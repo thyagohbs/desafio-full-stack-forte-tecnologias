@@ -13,36 +13,33 @@ datasource db {
 
 model Company {
   id        String     @id @default(uuid())
-  name      String
+  name      String     @unique
   cnpj      String     @unique
   employees Employee[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Employee {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  cpf       String   @unique
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  assets    AssetAssignment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String            @id @default(uuid())
+  name        String
+  email       String            @unique
+  cpf         String            @unique
+  companyId   String
+  company     Company           @relation(fields: [companyId], references: [id])
+  assignments AssetAssignment[] // Relação com a tabela de associação
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model Asset {
   id          String            @id @default(uuid())
   name        String
   type        AssetType
-  status      AssetStatus
-  assignments AssetAssignment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status      AssetStatus       @default(DISPONIVEL)
+  assignments AssetAssignment[] // Relação com a tabela de associação
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model AssetAssignment {
@@ -53,17 +50,17 @@ model AssetAssignment {
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   assignedAt DateTime @default(now())
 
-  @@unique([assetId, employeeId])
+  @@unique([assetId]) // Um ativo só pode ser associado a um funcionário por vez
 }
 
 enum AssetType {
-  Notebook
-  Monitor
-  Celular
+  NOTEBOOK
+  MONITOR
+  CELULAR
 }
 
 enum AssetStatus {
-  Disponivel
-  Em_Uso
-  Em_Manutencao
+  DISPONIVEL
+  EM_USO
+  EM_MANUTENCAO
 }
