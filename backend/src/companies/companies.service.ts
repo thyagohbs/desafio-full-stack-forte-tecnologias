@@ -1,36 +1,29 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompaniesRepository } from './companies.repository';
 
 @Injectable()
 export class CompaniesService {
-  constructor(private readonly repository: CompaniesRepository) {}
+  constructor(private readonly companiesRepository: CompaniesRepository) {}
 
   create(createCompanyDto: CreateCompanyDto) {
-    // Aqui poderiam entrar regras de negócio, como verificar se o CNPJ já existe.
-    return this.repository.create(createCompanyDto);
+    return this.companiesRepository.create(createCompanyDto);
   }
 
   findAll() {
-    return this.repository.findAll();
+    return this.companiesRepository.findAll();
   }
 
-  async findOne(id: string) {
-    const company = await this.repository.findOne(id);
-    if (!company) {
-      throw new NotFoundException(`Company with ID "${id}" not found`);
-    }
-    return company;
+  findOne(id: string) {
+    return this.companiesRepository.findOne(id);
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto) {
-    await this.findOne(id); // Garante que a empresa existe antes de atualizar
-    return this.repository.update(id, updateCompanyDto);
+  update(id: string, updateCompanyDto: UpdateCompanyDto) {
+    return this.companiesRepository.update(id, updateCompanyDto);
   }
 
-  async remove(id: string) {
-    await this.findOne(id); // Garante que a empresa existe antes de remover
-    return this.repository.remove(id);
+  remove(id: string) {
+    return this.companiesRepository.remove(id);
   }
 }
