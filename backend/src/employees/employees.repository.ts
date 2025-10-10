@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
@@ -14,15 +14,12 @@ export class EmployeesRepository {
   }
 
   findAll() {
-    return this.prisma.employee.findMany({
-      include: { company: true },
-    });
+    return this.prisma.employee.findMany();
   }
 
   findOne(id: string) {
     return this.prisma.employee.findUnique({
       where: { id },
-      include: { company: true },
     });
   }
 
