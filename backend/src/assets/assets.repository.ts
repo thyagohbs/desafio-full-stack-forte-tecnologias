@@ -44,8 +44,12 @@ export class AssetsRepository {
     const count = await this.prisma.asset.count({
       where: {
         type: assetType,
-        assignment: {
-          employeeId: employeeId,
+        status: AssetStatus.EM_USO,
+        assignments: {
+          some: {
+            employeeId: employeeId,
+            unassignedAt: null,
+          },
         },
       },
     });
