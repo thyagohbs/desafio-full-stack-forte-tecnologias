@@ -1,26 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
-import { AssetStatus, AssetType } from 'generated/prisma';
+import { AssetStatus, AssetType } from '@prisma/client';
 
 @Injectable()
 export class AssetsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createAssetDto: CreateAssetDto) {
-    return this.prisma.asset.create({
-      data: createAssetDto,
-    });
+    return this.prisma.asset.create({ data: createAssetDto });
   }
 
   findAll() {
-    return this.prisma.asset.findMany();
+    return this.prisma.asset.findMany({
+      include: {
+        assignments: {
+          where: { unassignedAt: null },
+          include: { employee: true },
+        },
+      },
+    });
   }
 
   findOne(id: string) {
     return this.prisma.asset.findUnique({
       where: { id },
+      include: {
+        assignments: {
+          where: { unassignedAt: null },
+          include: { employee: true },
+        },
+      },
     });
   }
 
@@ -32,9 +43,7 @@ export class AssetsRepository {
   }
 
   remove(id: string) {
-    return this.prisma.asset.delete({
-      where: { id },
-    });
+    return this.prisma.asset.delete({ where: { id } });
   }
 
   async employeeHasAssetType(
@@ -44,7 +53,6 @@ export class AssetsRepository {
     const count = await this.prisma.asset.count({
       where: {
         type: assetType,
-        status: AssetStatus.EM_USO,
         assignments: {
           some: {
             employeeId: employeeId,
@@ -57,31 +65,30 @@ export class AssetsRepository {
   }
 
   assign(assetId: string, employeeId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      await tx.asset.update({
+    return this.prisma.$transaction([
+      this.prisma.asset.update({
         where: { id: assetId },
         data: { status: AssetStatus.EM_USO },
-      });
-
-      return tx.assetAssignment.create({
+      }),
+      this.prisma.assetAssignment.create({
         data: {
           assetId,
           employeeId,
         },
-      });
-    });
+      }),
+    ]);
   }
 
   unassign(assetId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      await tx.assetAssignment.delete({
-        where: { assetId },
-      });
-
-      return tx.asset.update({
+    return this.prisma.$transaction([
+      this.prisma.asset.update({
         where: { id: assetId },
         data: { status: AssetStatus.DISPONIVEL },
-      });
-    });
+      }),
+      this.prisma.assetAssignment.updateMany({
+        where: { assetId: assetId, unassignedAt: null },
+        data: { unassignedAt: new Date() },
+      }),
+    ]);
   }
 }

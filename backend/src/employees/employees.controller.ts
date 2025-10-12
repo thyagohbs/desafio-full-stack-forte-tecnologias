@@ -23,9 +23,10 @@ export class EmployeesController {
   @ApiOperation({ summary: 'Criar um novo funcionário' })
   @ApiResponse({
     status: 201,
-    description: 'O funcionário foi criado com sucesso.',
+    description: 'Funcionário criado com sucesso.',
   })
   @ApiResponse({ status: 400, description: 'Parâmetros inválidos.' })
+  @ApiResponse({ status: 404, description: 'Empresa não encontrada.' })
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.create(createEmployeeDto);
   }
@@ -42,10 +43,7 @@ export class EmployeesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar um funcionário pelo ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Funcionário retornado com sucesso.',
-  })
+  @ApiResponse({ status: 200, description: 'Funcionário encontrado.' })
   @ApiResponse({ status: 404, description: 'Funcionário não encontrado.' })
   findOne(@Param('id') id: string) {
     return this.employeesService.findOne(id);
@@ -57,8 +55,10 @@ export class EmployeesController {
     status: 200,
     description: 'Funcionário atualizado com sucesso.',
   })
-  @ApiResponse({ status: 400, description: 'Parâmetros inválidos.' })
-  @ApiResponse({ status: 404, description: 'Funcionário não encontrado.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Funcionário ou empresa não encontrada.',
+  })
   update(
     @Param('id') id: string,
     @Body() updateEmployeeDto: UpdateEmployeeDto,

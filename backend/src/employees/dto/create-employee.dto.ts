@@ -2,35 +2,22 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreateEmployeeDto {
-  @ApiProperty({
-    example: 'João da Silva',
-    description: 'Nome do funcionário',
-  })
+  @ApiProperty({ example: 'João da Silva' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
-    example: 'joao.silva@example.com',
-    description: 'E-mail do funcionário (deve ser único)',
-  })
+  @ApiProperty({ example: 'joao.silva@example.com' })
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @ApiProperty({
-    example: 'Desenvolvedor de Software',
-    description: 'Cargo do funcionário',
+    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+    description: 'ID da empresa à qual o funcionário pertence',
   })
   @IsString()
   @IsNotEmpty()
-  role: string;
-
-  @ApiProperty({
-    example: 'uuid-da-empresa',
-    description: 'ID da empresa à qual o funcionário pertence',
-  })
   @IsUUID()
-  @IsNotEmpty()
   companyId: string;
 }

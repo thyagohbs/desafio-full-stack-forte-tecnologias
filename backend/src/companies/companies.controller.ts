@@ -23,7 +23,7 @@ export class CompaniesController {
   @ApiOperation({ summary: 'Criar uma nova empresa' })
   @ApiResponse({
     status: 201,
-    description: 'A empresa foi criada com sucesso.',
+    description: 'Empresa criada com sucesso.',
   })
   @ApiResponse({ status: 400, description: 'Parâmetros inválidos.' })
   create(@Body() createCompanyDto: CreateCompanyDto) {
@@ -42,7 +42,7 @@ export class CompaniesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar uma empresa pelo ID' })
-  @ApiResponse({ status: 200, description: 'Empresa retornada com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Empresa encontrada.' })
   @ApiResponse({ status: 404, description: 'Empresa não encontrada.' })
   findOne(@Param('id') id: string) {
     return this.companiesService.findOne(id);
@@ -50,11 +50,7 @@ export class CompaniesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar uma empresa' })
-  @ApiResponse({
-    status: 200,
-    description: 'Empresa atualizada com sucesso.',
-  })
-  @ApiResponse({ status: 400, description: 'Parâmetros inválidos.' })
+  @ApiResponse({ status: 200, description: 'Empresa atualizada com sucesso.' })
   @ApiResponse({ status: 404, description: 'Empresa não encontrada.' })
   update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
     return this.companiesService.update(id, updateCompanyDto);

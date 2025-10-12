@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -13,7 +12,7 @@ datasource db {
 
 model Company {
   id        String     @id @default(uuid())
-  name      String     @unique
+  name      String
   cnpj      String     @unique
   employees Employee[]
   createdAt DateTime   @default(now())
@@ -26,7 +25,7 @@ model Employee {
   email       String            @unique
   cpf         String            @unique
   companyId   String
-  company     Company           @relation(fields: [companyId], references: [id])
+  company     Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   assignments AssetAssignment[] // Relação com a tabela de associação
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
@@ -49,8 +48,9 @@ model AssetAssignment {
   asset      Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   assignedAt DateTime @default(now())
+  unassignedAt DateTime?
 
-  @@unique([assetId]) // Um ativo só pode ser associado a um funcionário por vez
+  @@unique([assetId, employeeId], name: "asset_employee_unique_assignment")
 }
 
 enum AssetType {

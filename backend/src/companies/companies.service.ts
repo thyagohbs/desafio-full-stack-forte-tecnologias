@@ -1,29 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompaniesRepository } from './companies.repository';
 
 @Injectable()
 export class CompaniesService {
-  constructor(private readonly companiesRepository: CompaniesRepository) {}
+  constructor(private readonly repository: CompaniesRepository) {}
 
   create(createCompanyDto: CreateCompanyDto) {
-    return this.companiesRepository.create(createCompanyDto);
+    return this.repository.create(createCompanyDto);
   }
 
   findAll() {
-    return this.companiesRepository.findAll();
+    return this.repository.findAll();
   }
 
-  findOne(id: string) {
-    return this.companiesRepository.findOne(id);
+  async findOne(id: string) {
+    const company = await this.repository.findOne(id);
+    if (!company) {
+      throw new NotFoundException(`Empresa com ID ${id} não encontrada.`);
+    }
+    return company;
   }
 
-  update(id: string, updateCompanyDto: UpdateCompanyDto) {
-    return this.companiesRepository.update(id, updateCompanyDto);
+  async update(id: string, updateCompanyDto: UpdateCompanyDto) {
+    await this.findOne(id);
+    return this.repository.update(id, updateCompanyDto);
   }
 
-  remove(id: string) {
-    return this.companiesRepository.remove(id);
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.repository.remove(id);
   }
 }

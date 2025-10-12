@@ -9,11 +9,11 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { AssignAssetDto } from './dto/assign-asset.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('assets')
 @Controller('assets')
@@ -73,20 +73,19 @@ export class AssetsController {
   })
   @ApiResponse({
     status: 409,
-    description: 'Funcionário já possui um notebook.',
+    description:
+      'Regra de negócio violada. Ex: Ativo não está disponível ou funcionário já possui um notebook.',
   })
-  assignAsset(@Param('id') id: string, @Body() assignAssetDto: AssignAssetDto) {
-    return this.assetsService.assignAsset(id, assignAssetDto.employeeId);
+  assign(@Param('id') id: string, @Body() assignAssetDto: AssignAssetDto) {
+    return this.assetsService.assign(id, assignAssetDto.employeeId);
   }
 
   @Post(':id/unassign')
-  @ApiOperation({ summary: 'Desassociar um ativo' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Desassociar um ativo de um funcionário' })
   @ApiResponse({ status: 200, description: 'Ativo desassociado com sucesso.' })
-  @ApiResponse({
-    status: 404,
-    description: 'Associação do ativo não encontrada.',
-  })
-  unassignAsset(@Param('id') id: string) {
-    return this.assetsService.unassignAsset(id);
+  @ApiResponse({ status: 404, description: 'Associação não encontrada.' })
+  unassign(@Param('id') id: string) {
+    return this.assetsService.unassign(id);
   }
 }

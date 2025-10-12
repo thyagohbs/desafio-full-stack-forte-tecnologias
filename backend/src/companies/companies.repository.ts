@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
@@ -8,18 +8,23 @@ export class CompaniesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createCompanyDto: CreateCompanyDto) {
-    return this.prisma.company.create({
-      data: createCompanyDto,
-    });
+    return this.prisma.company.create({ data: createCompanyDto });
   }
 
   findAll() {
-    return this.prisma.company.findMany();
+    return this.prisma.company.findMany({
+      include: {
+        employees: true,
+      },
+    });
   }
 
   findOne(id: string) {
     return this.prisma.company.findUnique({
       where: { id },
+      include: {
+        employees: true,
+      },
     });
   }
 
@@ -31,8 +36,6 @@ export class CompaniesRepository {
   }
 
   remove(id: string) {
-    return this.prisma.company.delete({
-      where: { id },
-    });
+    return this.prisma.company.delete({ where: { id } });
   }
 }
