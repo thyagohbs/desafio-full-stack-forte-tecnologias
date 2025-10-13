@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="header">
+    <h1>Empresas</h1>
+    <button mat-raised-button color="primary" (click)="openCompanyForm()">
+      Nova Empresa
+    </button>
+  </div>
+
+  <mat-table [dataSource]="companies" class="mat-elevation-z8">
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef> Nome </mat-header-cell>
+      <mat-cell *matCellDef="let company"> {{ company.name }} </mat-cell>
+    </ng-container>
+
+    <!-- CNPJ Column -->
+    <ng-container matColumnDef="cnpj">
+      <mat-header-cell *matHeaderCellDef> CNPJ </mat-header-cell>
+      <mat-cell *matCellDef="let company"> {{ company.cnpj }} </mat-cell>
+    </ng-container>
+
+    <!-- Address Column -->
+    <ng-container matColumnDef="address">
+      <mat-header-cell *matHeaderCellDef> Endereço </mat-header-cell>
+      <mat-cell *matCellDef="let company"> {{ company.address }} </mat-cell>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef> Ações </mat-header-cell>
+      <mat-cell *matCellDef="let company">
+        <button mat-icon-button color="primary" (click)="viewEmployees(company)" matTooltip="Ver Funcionários">
+          <mat-icon>people</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" (click)="openCompanyForm(company)" matTooltip="Editar">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteCompany(company.id)" matTooltip="Excluir">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  </mat-table>
+</div>

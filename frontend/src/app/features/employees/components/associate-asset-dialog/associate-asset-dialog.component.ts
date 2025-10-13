@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Asset } from '../../../../core/models/asset.model';
 import { AssetService } from '../../../../core/services/asset.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-associate-asset-dialog',
@@ -10,17 +11,17 @@ import { AssetService } from '../../../../core/services/asset.service';
   styleUrls: ['./associate-asset-dialog.component.css'],
 })
 export class AssociateAssetDialogComponent implements OnInit {
-  associateForm: FormGroup;
+  form: FormGroup;
   availableAssets: Asset[] = [];
 
   constructor(
-    public dialogRef: MatDialogRef<AssociateAssetDialogComponent>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: { companyId: string; employeeId: string },
     private fb: FormBuilder,
-    private assetService: AssetService
+    private assetService: AssetService,
+    public dialogRef: MatDialogRef<AssociateAssetDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private notificationService: NotificationService
   ) {
-    this.associateForm = this.fb.group({
+    this.form = this.fb.group({
       assetId: ['', Validators.required],
     });
   }
@@ -31,24 +32,30 @@ export class AssociateAssetDialogComponent implements OnInit {
 
   loadAvailableAssets(): void {
     this.assetService
-      .getUnassociatedAssets(this.data.companyId)
+      .getAvailableAssetsByCompany(this.data.companyId)
       .subscribe((assets) => {
         this.availableAssets = assets;
       });
   }
 
-  onCancel(): void {
-    this.dialogRef.close();
-  }
-
   onSubmit(): void {
-    if (this.associateForm.valid) {
-      const assetId = this.associateForm.value.assetId;
+    if (this.form.valid) {
       this.assetService
-        .associateAssetToEmployee(this.data.employeeId, assetId)
-        .subscribe(() => {
-          this.dialogRef.close(true);
+        .associateAssetToEmployee(this.data.employeeId, this.form.value.assetId)
+        .subscribe({
+          next: () => {
+            this.dialogRef.close(true);
+          },
+          error: (err) => {
+            this.notificationService.showError(
+              err.error.message || 'Erro ao associar o ativo.'
+            );
+          },
         });
     }
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
   }
 }
