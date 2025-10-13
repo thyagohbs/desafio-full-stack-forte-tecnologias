@@ -43,7 +43,7 @@ export class AssociateAssetDialogComponent implements OnInit {
 
   onSubmit(): void {
     if (this.associateForm.valid) {
-      const { assetId } = this.associateForm.value;
+      const assetId = this.associateForm.value.assetId;
       this.assetService
         .associateAssetToEmployee(this.data.employeeId, assetId)
         .subscribe(() => {

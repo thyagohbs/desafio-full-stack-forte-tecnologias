@@ -5,6 +5,7 @@ import { Asset } from '../../../../core/models/asset.model';
 import { AssetService } from '../../../../core/services/asset.service';
 import { AssetFormComponent } from '../../components/asset-form/asset-form.component';
 import { AssociateAssetDialogComponent } from '../../components/associate-asset-dialog/associate-asset-dialog.component';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-employee-asset-list',
@@ -20,7 +21,8 @@ export class EmployeeAssetListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private assetService: AssetService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +48,9 @@ export class EmployeeAssetListComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadAssets();
+        this.notificationService.showSuccess(
+          'Novo ativo criado e associado com sucesso!'
+        );
       }
     });
   }
@@ -59,6 +64,7 @@ export class EmployeeAssetListComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadAssets();
+        this.notificationService.showSuccess('Ativo associado com sucesso!');
       }
     });
   }
@@ -66,8 +72,16 @@ export class EmployeeAssetListComponent implements OnInit {
   disassociateAsset(assetId: string): void {
     this.assetService
       .disassociateAssetFromEmployee(this.employeeId, assetId)
-      .subscribe(() => {
-        this.loadAssets();
+      .subscribe({
+        next: () => {
+          this.loadAssets();
+          this.notificationService.showSuccess(
+            'Ativo desassociado com sucesso!'
+          );
+        },
+        error: () => {
+          this.notificationService.showError('Erro ao desassociar o ativo.');
+        },
       });
   }
 }

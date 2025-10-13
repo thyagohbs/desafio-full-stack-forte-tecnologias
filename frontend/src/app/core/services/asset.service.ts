@@ -41,4 +41,37 @@ export class AssetService {
   unassignFromEmployee(assetId: string): Observable<Asset> {
     return this.http.patch<Asset>(`${this.apiUrl}/${assetId}/unassign`, {});
   }
+
+  getAssetsByEmployee(employeeId: string): Observable<Asset[]> {
+    return this.http.get<Asset[]>(
+      `${environment.apiUrl}/employees/${employeeId}/assets`
+    );
+  }
+
+  createAsset(asset: Omit<Asset, 'id'>): Observable<Asset> {
+    return this.http.post<Asset>(this.apiUrl, asset);
+  }
+
+  associateAssetToEmployee(
+    employeeId: string,
+    assetId: string
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiUrl}/employees/${employeeId}/assets/${assetId}`,
+      {}
+    );
+  }
+
+  disassociateAssetFromEmployee(
+    employeeId: string,
+    assetId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiUrl}/employees/${employeeId}/assets/${assetId}`
+    );
+  }
+
+  getUnassociatedAssets(companyId: string): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${this.apiUrl}/unassociated/${companyId}`);
+  }
 }
