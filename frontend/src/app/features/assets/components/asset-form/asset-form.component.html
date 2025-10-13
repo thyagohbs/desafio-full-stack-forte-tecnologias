@@ -1,1 +1,32 @@
-<p>asset-form works!</p>
+<h2 mat-dialog-title>{{ isEditMode ? 'Editar Ativo' : 'Novo Ativo' }}</h2>
+
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="fill">
+    <mat-label>Nome</mat-label>
+    <input matInput formControlName="name" required>
+    <mat-error *ngIf="form.get('name')?.hasError('required')">Nome é obrigatório</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Tag</mat-label>
+    <input matInput formControlName="tag" required>
+    <mat-error *ngIf="form.get('tag')?.hasError('required')">Tag é obrigatória</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Tipo</mat-label>
+    <mat-select formControlName="type" required>
+      <mat-option *ngFor="let type of assetTypes" [value]="type">
+        {{ type }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('type')?.hasError('required')">Tipo é obrigatório</mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="form.invalid">
+    {{ isEditMode ? 'Salvar' : 'Criar' }}
+  </button>
+</mat-dialog-actions>

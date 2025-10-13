@@ -1,1 +1,51 @@
-<p>assets works!</p>
+<div class="container">
+  <div class="header">
+    <h1>Gerenciamento de Ativos</h1>
+    <button mat-raised-button color="primary" (click)="openAssetForm()">
+      <mat-icon>add</mat-icon>
+      Novo Ativo
+    </button>
+  </div>
+
+  <mat-table [dataSource]="assets" class="mat-elevation-z8">
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef> Nome </mat-header-cell>
+      <mat-cell *matCellDef="let asset"> {{ asset.name }} </mat-cell>
+    </ng-container>
+
+    <!-- Tag Column -->
+    <ng-container matColumnDef="tag">
+      <mat-header-cell *matHeaderCellDef> Tag </mat-header-cell>
+      <mat-cell *matCellDef="let asset"> {{ asset.tag }} </mat-cell>
+    </ng-container>
+
+    <!-- Type Column -->
+    <ng-container matColumnDef="type">
+      <mat-header-cell *matHeaderCellDef> Tipo </mat-header-cell>
+      <mat-cell *matCellDef="let asset"> {{ asset.type }} </mat-cell>
+    </ng-container>
+
+    <!-- Status Column -->
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
+      <mat-cell *matCellDef="let asset"> {{ getStatus(asset) }} </mat-cell>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef> Ações </mat-header-cell>
+      <mat-cell *matCellDef="let asset">
+        <button mat-icon-button color="accent" (click)="openAssetForm(asset)" matTooltip="Editar">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteAsset(asset)" matTooltip="Excluir">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>
