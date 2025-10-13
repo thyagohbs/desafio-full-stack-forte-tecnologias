@@ -3,8 +3,18 @@ export interface Employee {
   name: string;
   email: string;
   cpf: string;
+  position: string;
+  companyId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateEmployeeDto {
+  name: string;
+  email: string;
+  cpf: string;
+  position: string;
   companyId: string;
 }
 
-export type CreateEmployeeDto = Omit<Employee, 'id'>;
-export type UpdateEmployeeDto = Partial<CreateEmployeeDto>;
+export type UpdateEmployeeDto = Partial<Omit<CreateEmployeeDto, 'companyId'>>;

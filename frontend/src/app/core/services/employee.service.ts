@@ -1,8 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Asset } from '../models/asset.model';
 import {
   CreateEmployeeDto,
   Employee,
@@ -15,7 +14,19 @@ import {
 export class EmployeeService {
   private readonly apiUrl = `${environment.apiUrl}/employees`;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private http: HttpClient) {}
+
+  getAll(companyId?: string): Observable<Employee[]> {
+    let params = new HttpParams();
+    if (companyId) {
+      params = params.set('companyId', companyId);
+    }
+    return this.http.get<Employee[]>(this.apiUrl, { params });
+  }
+
+  getById(id: string): Observable<Employee> {
+    return this.http.get<Employee>(`${this.apiUrl}/${id}`);
+  }
 
   create(employee: CreateEmployeeDto): Observable<Employee> {
     return this.http.post<Employee>(this.apiUrl, employee);
@@ -27,19 +38,5 @@ export class EmployeeService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  getAssets(employeeId: string): Observable<Asset[]> {
-    return this.http.get<Asset[]>(`${this.apiUrl}/${employeeId}/assets`);
-  }
-
-  getEmployeesByCompany(companyId: string): Observable<Employee[]> {
-    return this.http.get<Employee[]>(
-      `${environment.apiUrl}/companies/${companyId}/employees`
-    );
-  }
-
-  getEmployeeAssets(employeeId: string): Observable<Asset[]> {
-    return this.http.get<Asset[]>(`${this.apiUrl}/${employeeId}/assets`);
   }
 }
