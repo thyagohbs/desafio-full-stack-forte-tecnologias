@@ -1,7 +1,10 @@
 <mat-toolbar color="primary">
   <span>Forte Asset Manager</span>
+  <div class="nav-links">
+    <a mat-button routerLink="/companies" routerLinkActive="active-link">Empresas</a>
+    <a mat-button routerLink="/employees" routerLinkActive="active-link">Funcionários</a>
+    <a mat-button routerLink="/assets" routerLinkActive="active-link">Ativos</a>
+  </div>
 </mat-toolbar>
 
-<main>
-  <router-outlet></router-outlet>
-</main>
+<router-outlet></router-outlet>

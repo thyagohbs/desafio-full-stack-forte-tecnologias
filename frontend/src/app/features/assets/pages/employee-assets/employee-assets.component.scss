@@ -1,0 +1,19 @@
+
+.container {
+  padding: 24px;
+}
+
+.lists-container {
+  display: flex;
+  gap: 24px;
+}
+
+.asset-list {
+  flex: 1;
+}
+
+mat-list-item {
+  .mat-icon-button {
+    margin-left: auto;
+  }
+}

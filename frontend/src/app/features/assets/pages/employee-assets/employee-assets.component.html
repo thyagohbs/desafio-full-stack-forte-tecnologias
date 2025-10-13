@@ -1,0 +1,49 @@
+<div class="container" *ngIf="employee">
+  <h1>Ativos de {{ employee.name }}</h1>
+
+  <div class="lists-container">
+    <!-- Associated Assets List -->
+    <mat-card class="asset-list">
+      <mat-card-header>
+        <mat-card-title>Ativos Associados</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let asset of associatedAssets">
+            <span matListItemTitle>{{ asset.name }} ({{ asset.type }})</span>
+            <span matListItemLine>Tag: {{ asset.tag }}</span>
+            <button mat-icon-button color="warn" (click)="disassociateAsset(asset.id)" matTooltip="Desassociar">
+              <mat-icon>link_off</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+        <p *ngIf="associatedAssets.length === 0">Nenhum ativo associado.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Available Assets List -->
+    <mat-card class="asset-list">
+      <mat-card-header>
+        <mat-card-title>Ativos Disponíveis</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let asset of availableAssets">
+            <span matListItemTitle>{{ asset.name }} ({{ asset.type }})</span>
+            <span matListItemLine>Tag: {{ asset.tag }}</span>
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="associateAsset(asset.id)"
+              [disabled]="hasNotebook && asset.type.toLowerCase() === 'notebook'"
+              matTooltip="{{ hasNotebook && asset.type.toLowerCase() === 'notebook' ? 'Funcionário já possui um notebook' : 'Associar' }}"
+            >
+              <mat-icon>add_link</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+        <p *ngIf="availableAssets.length === 0">Nenhum ativo disponível.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

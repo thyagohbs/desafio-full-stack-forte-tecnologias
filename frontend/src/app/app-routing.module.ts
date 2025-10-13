@@ -1,22 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { CompaniesComponent } from './features/companies/pages/companies/companies.component';
+import { EmployeesComponent } from './features/employees/pages/employees/employees.component';
+import { EmployeeAssetsComponent } from './features/assets/pages/employee-assets/employee-assets.component';
+import { AssetsComponent } from './features/assets/pages/assets/assets.component';
 
 const routes: Routes = [
-  {
-    path: 'companies',
-    loadChildren: () =>
-      import('./features/companies/companies.module').then(
-        (m) => m.CompaniesModule
-      ),
-  },
-  {
-    path: 'employees',
-    loadChildren: () =>
-      import('./features/employees/employees.module').then(
-        (m) => m.EmployeesModule
-      ),
-  },
-  { path: '', redirectTo: '/companies', pathMatch: 'full' },
+  { path: '', redirectTo: 'companies', pathMatch: 'full' },
+  { path: 'companies', component: CompaniesComponent },
+  { path: 'companies/:id/employees', component: EmployeesComponent },
+  { path: 'employees', component: EmployeesComponent },
+  { path: 'employees/:id/assets', component: EmployeeAssetsComponent },
+  { path: 'assets', component: AssetsComponent },
 ];
 
 @NgModule({
