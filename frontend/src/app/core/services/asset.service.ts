@@ -1,19 +1,31 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Asset, CreateAssetDto, UpdateAssetDto } from '../models/asset.model';
+import {
+  Asset,
+  AssignAssetDto,
+  CreateAssetDto,
+  UpdateAssetDto,
+} from '../models/asset.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AssetService {
-  private apiUrl = `${environment.apiUrl}/assets`;
+  private readonly apiUrl = `${environment.apiUrl}/assets`;
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Asset[]> {
-    return this.http.get<Asset[]>(this.apiUrl);
+  getAll(employeeId?: string, unassigned?: boolean): Observable<Asset[]> {
+    let params = new HttpParams();
+    if (employeeId) {
+      params = params.set('employeeId', employeeId);
+    }
+    if (unassigned) {
+      params = params.set('unassigned', 'true');
+    }
+    return this.http.get<Asset[]>(this.apiUrl, { params });
   }
 
   getById(id: string): Observable<Asset> {
@@ -32,46 +44,11 @@ export class AssetService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  assignToEmployee(assetId: string, employeeId: string): Observable<Asset> {
-    return this.http.patch<Asset>(`${this.apiUrl}/${assetId}/assign`, {
-      employeeId,
-    });
+  assign(id: string, payload: AssignAssetDto): Observable<Asset> {
+    return this.http.patch<Asset>(`${this.apiUrl}/${id}/assign`, payload);
   }
 
-  unassignFromEmployee(assetId: string): Observable<Asset> {
-    return this.http.patch<Asset>(`${this.apiUrl}/${assetId}/unassign`, {});
-  }
-
-  getAssetsByEmployee(employeeId: string): Observable<Asset[]> {
-    return this.http.get<Asset[]>(
-      `${environment.apiUrl}/employees/${employeeId}/assets`
-    );
-  }
-
-  createAsset(asset: Omit<Asset, 'id'>): Observable<Asset> {
-    return this.http.post<Asset>(this.apiUrl, asset);
-  }
-
-  associateAssetToEmployee(
-    employeeId: string,
-    assetId: string
-  ): Observable<void> {
-    return this.http.post<void>(
-      `${environment.apiUrl}/employees/${employeeId}/assets/${assetId}`,
-      {}
-    );
-  }
-
-  disassociateAssetFromEmployee(
-    employeeId: string,
-    assetId: string
-  ): Observable<void> {
-    return this.http.delete<void>(
-      `${environment.apiUrl}/employees/${employeeId}/assets/${assetId}`
-    );
-  }
-
-  getUnassociatedAssets(companyId: string): Observable<Asset[]> {
-    return this.http.get<Asset[]>(`${this.apiUrl}/unassociated/${companyId}`);
+  unassign(id: string): Observable<Asset> {
+    return this.http.patch<Asset>(`${this.apiUrl}/${id}/unassign`, {});
   }
 }

@@ -1,0 +1,31 @@
+<h1 mat-dialog-title>{{ isEditMode ? 'Editar Funcionário' : 'Novo Funcionário' }}</h1>
+<div mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="fill">
+    <mat-label>Nome</mat-label>
+    <input matInput formControlName="name" required>
+    <mat-error *ngIf="form.get('name')?.hasError('required')">Nome é obrigatório</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="email" required>
+    <mat-error *ngIf="form.get('email')?.hasError('required')">Email é obrigatório</mat-error>
+    <mat-error *ngIf="form.get('email')?.hasError('email')">Email inválido</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>CPF</mat-label>
+    <input matInput formControlName="cpf" required>
+    <mat-error *ngIf="form.get('cpf')?.hasError('required')">CPF é obrigatório</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Cargo</mat-label>
+    <input matInput formControlName="position" required>
+    <mat-error *ngIf="form.get('position')?.hasError('required')">Cargo é obrigatório</mat-error>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="form.invalid">Salvar</button>
+</div>

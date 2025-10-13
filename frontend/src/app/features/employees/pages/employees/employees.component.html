@@ -1,1 +1,61 @@
-<p>employees works!</p>
+<div class="container">
+  <div class="header">
+    <h1>
+      {{ company ? 'Funcionários de ' + company.name : 'Todos os Funcionários' }}
+    </h1>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openEmployeeForm()"
+      [disabled]="!companyId"
+      matTooltip="É necessário estar na página de uma empresa para adicionar um funcionário"
+    >
+      Novo Funcionário
+    </button>
+  </div>
+
+  <mat-table [dataSource]="employees" class="mat-elevation-z8">
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef> Nome </mat-header-cell>
+      <mat-cell *matCellDef="let employee"> {{ employee.name }} </mat-cell>
+    </ng-container>
+
+    <!-- Email Column -->
+    <ng-container matColumnDef="email">
+      <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
+      <mat-cell *matCellDef="let employee"> {{ employee.email }} </mat-cell>
+    </ng-container>
+
+    <!-- CPF Column -->
+    <ng-container matColumnDef="cpf">
+      <mat-header-cell *matHeaderCellDef> CPF </mat-header-cell>
+      <mat-cell *matCellDef="let employee"> {{ employee.cpf }} </mat-cell>
+    </ng-container>
+
+    <!-- Position Column -->
+    <ng-container matColumnDef="position">
+      <mat-header-cell *matHeaderCellDef> Cargo </mat-header-cell>
+      <mat-cell *matCellDef="let employee"> {{ employee.position }} </mat-cell>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef> Ações </mat-header-cell>
+      <mat-cell *matCellDef="let employee">
+        <button mat-icon-button color="primary" (click)="viewAssets(employee)" matTooltip="Ver Ativos">
+          <mat-icon>work</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" (click)="openEmployeeForm(employee)" matTooltip="Editar">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteEmployee(employee)" matTooltip="Excluir">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  </mat-table>
+</div>
