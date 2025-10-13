@@ -1,0 +1,48 @@
+
+<div class="container">
+  <button mat-stroked-button routerLink="/companies">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar para Empresas
+  </button>
+
+  <mat-card *ngIf="company" class="company-card">
+    <mat-card-header>
+      <mat-card-title>{{ company.name }}</mat-card-title>
+    </mat-card-header>
+  </mat-card>
+
+  <mat-toolbar>
+    <span>Funcionários</span>
+  </mat-toolbar>
+
+  <table mat-table [dataSource]="employees" class="mat-elevation-z8">
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let employee">{{ employee.name }}</td>
+    </ng-container>
+
+    <!-- Email Column -->
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>Email</th>
+      <td mat-cell *matCellDef="let employee">{{ employee.email }}</td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Ações</th>
+      <td mat-cell *matCellDef="let employee">
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="viewEmployeeAssets(employee.id)"
+        >
+          <mat-icon>work</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</div>

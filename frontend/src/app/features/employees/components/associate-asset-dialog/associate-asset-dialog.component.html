@@ -1,0 +1,27 @@
+<h1 mat-dialog-title>Associar Ativo Existente</h1>
+<div mat-dialog-content>
+  <form [formGroup]="associateForm">
+    <mat-form-field appearance="fill">
+      <mat-label>Ativos Disponíveis</mat-label>
+      <mat-select formControlName="assetId">
+        <mat-option
+          *ngFor="let asset of availableAssets"
+          [value]="asset.id"
+        >
+          {{ asset.name }} ({{ asset.type }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="!associateForm.valid"
+  >
+    Associar
+  </button>
+</div>

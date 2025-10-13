@@ -1,0 +1,20 @@
+.container {
+  margin: 2rem;
+}
+
+button[mat-stroked-button] {
+  margin-bottom: 1rem;
+}
+
+.company-card {
+  margin-bottom: 2rem;
+}
+
+table {
+  width: 100%;
+}
+
+mat-toolbar {
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}

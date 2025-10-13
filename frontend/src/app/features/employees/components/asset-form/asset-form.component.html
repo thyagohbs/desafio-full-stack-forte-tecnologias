@@ -1,0 +1,36 @@
+<h1 mat-dialog-title>Adicionar Novo Ativo</h1>
+<div mat-dialog-content>
+  <form [formGroup]="assetForm">
+    <mat-form-field appearance="fill">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="type">
+        <mat-option value="Notebook">Notebook</mat-option>
+        <mat-option value="Monitor">Monitor</mat-option>
+        <mat-option value="Teclado">Teclado</mat-option>
+        <mat-option value="Mouse">Mouse</mat-option>
+        <mat-option value="Outro">Outro</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Descrição</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="!assetForm.valid"
+  >
+    Salvar
+  </button>
+</div>

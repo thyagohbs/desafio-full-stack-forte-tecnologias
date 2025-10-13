@@ -1,0 +1,12 @@
+.container {
+  margin: 2rem;
+}
+
+table {
+  width: 100%;
+}
+
+mat-toolbar {
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
