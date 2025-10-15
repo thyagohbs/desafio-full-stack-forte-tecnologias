@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Asset } from '../../../../core/models/asset.model';
@@ -11,6 +11,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
   styleUrls: ['./associate-asset-dialog.component.css'],
 })
 export class AssociateAssetDialogComponent implements OnInit {
+  @Output() assetAssociated = new EventEmitter<void>();
   form: FormGroup;
   availableAssets: Asset[] = [];
 

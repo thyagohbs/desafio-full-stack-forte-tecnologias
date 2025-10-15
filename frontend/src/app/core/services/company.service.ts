@@ -1,43 +1,61 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Company } from '../models/company.model';
 import { environment } from '../../../environments/environment';
-import {
-  Company,
-  CreateCompanyDto,
-  UpdateCompanyDto,
-} from '../models/company.model';
-import { Employee } from '../models/employee.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CompanyService {
-  private readonly apiUrl = `${environment.apiUrl}/companies`;
+  private apiUrl = `${environment.apiUrl}/companies`;
 
-  constructor(private readonly http: HttpClient) {}
+  private companiesSubject = new BehaviorSubject<Company[]>([]);
+  public companies$: Observable<Company[]> =
+    this.companiesSubject.asObservable();
+
+  constructor(private http: HttpClient) {}
 
   getAll(): Observable<Company[]> {
-    return this.http.get<Company[]>(this.apiUrl);
+    return this.http.get<Company[]>(this.apiUrl).pipe(
+      tap((companies) => {
+        this.companiesSubject.next(companies);
+      })
+    );
   }
 
   getById(id: string): Observable<Company> {
     return this.http.get<Company>(`${this.apiUrl}/${id}`);
   }
 
-  create(company: CreateCompanyDto): Observable<Company> {
-    return this.http.post<Company>(this.apiUrl, company);
+  create(company: Omit<Company, 'id'>): Observable<Company> {
+    return this.http.post<Company>(this.apiUrl, company).pipe(
+      tap((newCompany) => {
+        const currentCompanies = this.companiesSubject.getValue();
+        this.companiesSubject.next([...currentCompanies, newCompany]);
+      })
+    );
   }
 
-  update(id: string, company: UpdateCompanyDto): Observable<Company> {
-    return this.http.patch<Company>(`${this.apiUrl}/${id}`, company);
+  update(id: string, company: Partial<Company>): Observable<Company> {
+    return this.http.patch<Company>(`${this.apiUrl}/${id}`, company).pipe(
+      tap((updatedCompany) => {
+        const currentCompanies = this.companiesSubject.getValue();
+        const updatedCompanies = currentCompanies.map((c) =>
+          c.id === id ? updatedCompany : c
+        );
+        this.companiesSubject.next(updatedCompanies);
+      })
+    );
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  getEmployees(companyId: string): Observable<Employee[]> {
-    return this.http.get<Employee[]>(`${this.apiUrl}/${companyId}/employees`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        const currentCompanies = this.companiesSubject.getValue();
+        const remainingCompanies = currentCompanies.filter((c) => c.id !== id);
+        this.companiesSubject.next(remainingCompanies);
+      })
+    );
   }
 }

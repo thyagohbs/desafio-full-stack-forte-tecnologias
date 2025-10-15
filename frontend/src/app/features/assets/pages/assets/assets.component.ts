@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
 import { Asset } from '../../../../core/models/asset.model';
 import { AssetService } from '../../../../core/services/asset.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { AssetFormComponent } from '../../components/asset-form/asset-form.component';
 
 @Component({
@@ -12,14 +12,16 @@ import { AssetFormComponent } from '../../components/asset-form/asset-form.compo
   styleUrls: ['./assets.component.scss'],
 })
 export class AssetsComponent implements OnInit {
-  assets: Asset[] = [];
-  displayedColumns: string[] = ['name', 'tag', 'type', 'status', 'actions'];
+  assets$: Observable<Asset[]>;
+  displayedColumns: string[] = ['name', 'type', 'status', 'actions'];
 
   constructor(
     private assetService: AssetService,
-    private dialog: MatDialog,
-    private notificationService: NotificationService
-  ) {}
+    private notificationService: NotificationService,
+    public dialog: MatDialog
+  ) {
+    this.assets$ = this.assetService.assets$;
+  }
 
   ngOnInit(): void {
     this.loadAssets();
@@ -27,54 +29,32 @@ export class AssetsComponent implements OnInit {
 
   loadAssets(): void {
     this.assetService.getAll().subscribe({
-      next: (data) => {
-        this.assets = data;
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Erro ao carregar ativos.';
+        this.notificationService.showError(errorMessage);
       },
-      error: () =>
-        this.notificationService.showError('Erro ao carregar ativos.'),
     });
   }
 
-  openAssetForm(asset?: Asset): void {
+  openForm(asset?: Asset): void {
     const dialogRef = this.dialog.open(AssetFormComponent, {
       width: '400px',
       data: asset,
     });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadAssets();
-      }
-    });
   }
 
-  deleteAsset(asset: Asset): void {
-    if (asset.employeeId) {
-      this.notificationService.showError(
-        'Não é possível excluir um ativo associado a um funcionário.'
-      );
-      return;
+  deleteAsset(id: string): void {
+    if (confirm('Tem certeza que deseja excluir este ativo?')) {
+      this.assetService.delete(id).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Ativo excluído com sucesso.');
+        },
+        error: (err) => {
+          const errorMessage = err.error?.message || 'Erro ao excluir o ativo.';
+          this.notificationService.showError(errorMessage);
+        },
+      });
     }
-
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: {
-        title: 'Confirmar Exclusão',
-        message: `Tem certeza que deseja excluir o ativo ${asset.name}?`,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.assetService.delete(asset.id).subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Ativo excluído com sucesso!');
-            this.loadAssets();
-          },
-          error: () =>
-            this.notificationService.showError('Erro ao excluir ativo.'),
-        });
-      }
-    });
   }
 
   getStatus(asset: Asset): string {

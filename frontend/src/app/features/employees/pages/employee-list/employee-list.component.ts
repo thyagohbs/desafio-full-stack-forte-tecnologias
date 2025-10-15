@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { Employee } from '../../../../core/models/employee.model';
 import { EmployeeService } from '../../../../core/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -9,65 +9,59 @@ import { EmployeeFormComponent } from '../../components/employee-form/employee-f
 @Component({
   selector: 'app-employee-list',
   templateUrl: './employee-list.component.html',
-  styleUrls: ['./employee-list.component.css'],
+  styleUrls: ['./employee-list.component.scss'],
 })
 export class EmployeeListComponent implements OnInit {
-  employees: Employee[] = [];
-  displayedColumns: string[] = ['name', 'email', 'position', 'actions'];
-  companyId = '1';
+  employees$: Observable<Employee[]>;
+  displayedColumns: string[] = ['name', 'email', 'company', 'actions'];
 
   constructor(
     private employeeService: EmployeeService,
-    public dialog: MatDialog,
-    private router: Router,
+    private dialog: MatDialog,
     private notificationService: NotificationService
-  ) {}
+  ) {
+    this.employees$ = this.employeeService.employees$;
+  }
 
   ngOnInit(): void {
-    this.loadEmployees();
+    this.employeeService.getAll().subscribe({
+      error: (err) => {
+        this.notificationService.showError('Erro ao carregar os funcionários.');
+        console.error(err);
+      },
+    });
   }
 
-  loadEmployees(): void {
-    this.employeeService
-      .getEmployeesByCompany(this.companyId)
-      .subscribe((employees) => {
-        this.employees = employees;
-      });
-  }
-
-  openEmployeeForm(employee?: Employee): void {
+  openForm(employee?: Employee): void {
     const dialogRef = this.dialog.open(EmployeeFormComponent, {
       width: '400px',
-      data: { employee, companyId: this.companyId },
+      data: employee,
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.loadEmployees();
-        this.notificationService.showSuccess(
-          `Funcionário ${employee ? 'atualizado' : 'criado'} com sucesso!`
-        );
+        const message = employee
+          ? 'Funcionário atualizado com sucesso.'
+          : 'Funcionário criado com sucesso.';
+        this.notificationService.showSuccess(message);
       }
     });
   }
 
   deleteEmployee(id: string): void {
-    this.employeeService.deleteEmployee(id).subscribe({
-      next: () => {
-        this.loadEmployees();
-        this.notificationService.showSuccess(
-          'Funcionário excluído com sucesso!'
-        );
-      },
-      error: () => {
-        this.notificationService.showError('Erro ao excluir o funcionário.');
-      },
-    });
-  }
-
-  viewAssets(employee: Employee): void {
-    this.router.navigate(['/employees', employee.id, 'assets'], {
-      queryParams: { companyId: this.companyId },
-    });
+    if (confirm('Tem certeza que deseja excluir este funcionário?')) {
+      this.employeeService.delete(id).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            'Funcionário excluído com sucesso.'
+          );
+        },
+        error: (err) => {
+          const errorMessage =
+            err.error?.message || 'Erro ao excluir o funcionário.';
+          this.notificationService.showError(errorMessage);
+        },
+      });
+    }
   }
 }

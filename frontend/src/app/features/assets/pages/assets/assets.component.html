@@ -1,51 +1,55 @@
 <div class="container">
-  <div class="header">
-    <h1>Gerenciamento de Ativos</h1>
-    <button mat-raised-button color="primary" (click)="openAssetForm()">
+  <mat-toolbar color="primary">
+    <span>Gestão de Ativos</span>
+    <span class="spacer"></span>
+    <button mat-raised-button (click)="openForm()">
       <mat-icon>add</mat-icon>
       Novo Ativo
     </button>
+  </mat-toolbar>
+
+  <div class="mat-elevation-z8 content">
+    <table
+      mat-table
+      [dataSource]="assets$ | async"
+      class="full-width-table"
+      *ngIf="assets$ | async as assets"
+    >
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let asset">{{ asset.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let asset">{{ asset.type }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let asset">{{ asset.status }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let asset">
+          <button mat-icon-button color="primary" (click)="openForm(asset)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteAsset(asset.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          Nenhum ativo encontrado.
+        </td>
+      </tr>
+    </table>
   </div>
-
-  <mat-table [dataSource]="assets" class="mat-elevation-z8">
-    <!-- Name Column -->
-    <ng-container matColumnDef="name">
-      <mat-header-cell *matHeaderCellDef> Nome </mat-header-cell>
-      <mat-cell *matCellDef="let asset"> {{ asset.name }} </mat-cell>
-    </ng-container>
-
-    <!-- Tag Column -->
-    <ng-container matColumnDef="tag">
-      <mat-header-cell *matHeaderCellDef> Tag </mat-header-cell>
-      <mat-cell *matCellDef="let asset"> {{ asset.tag }} </mat-cell>
-    </ng-container>
-
-    <!-- Type Column -->
-    <ng-container matColumnDef="type">
-      <mat-header-cell *matHeaderCellDef> Tipo </mat-header-cell>
-      <mat-cell *matCellDef="let asset"> {{ asset.type }} </mat-cell>
-    </ng-container>
-
-    <!-- Status Column -->
-    <ng-container matColumnDef="status">
-      <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
-      <mat-cell *matCellDef="let asset"> {{ getStatus(asset) }} </mat-cell>
-    </ng-container>
-
-    <!-- Actions Column -->
-    <ng-container matColumnDef="actions">
-      <mat-header-cell *matHeaderCellDef> Ações </mat-header-cell>
-      <mat-cell *matCellDef="let asset">
-        <button mat-icon-button color="accent" (click)="openAssetForm(asset)" matTooltip="Editar">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button color="warn" (click)="deleteAsset(asset)" matTooltip="Excluir">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </mat-cell>
-    </ng-container>
-
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-  </mat-table>
 </div>
