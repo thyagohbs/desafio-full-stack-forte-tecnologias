@@ -9,13 +9,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { AssignAssetDto } from './dto/assign-asset.dto';
+import { DisassociateAssetDto } from './dto/disassociate-asset.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('assets')
+@ApiTags('Assets')
 @Controller('assets')
 export class AssetsController {
   constructor(private readonly assetsService: AssetsService) {}
@@ -64,9 +65,13 @@ export class AssetsController {
     return this.assetsService.remove(id);
   }
 
-  @Post(':id/assign')
-  @ApiOperation({ summary: 'Associar um ativo a um funcionário' })
-  @ApiResponse({ status: 200, description: 'Ativo associado com sucesso.' })
+  @Post('assign')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Associa um ativo a um funcionário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Ativo associado com sucesso.',
+  })
   @ApiResponse({
     status: 404,
     description: 'Ativo ou funcionário não encontrado.',
@@ -74,18 +79,25 @@ export class AssetsController {
   @ApiResponse({
     status: 409,
     description:
-      'Regra de negócio violada. Ex: Ativo não está disponível ou funcionário já possui um notebook.',
+      'Conflito de regra de negócio (ex: ativo não disponível ou funcionário já possui notebook).',
   })
-  assign(@Param('id') id: string, @Body() assignAssetDto: AssignAssetDto) {
-    return this.assetsService.assign(id, assignAssetDto.employeeId);
+  assign(@Body() assignAssetDto: AssignAssetDto) {
+    return this.assetsService.assign(assignAssetDto);
   }
 
-  @Post(':id/unassign')
+  @Post('disassociate')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Desassociar um ativo de um funcionário' })
-  @ApiResponse({ status: 200, description: 'Ativo desassociado com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Associação não encontrada.' })
-  unassign(@Param('id') id: string) {
-    return this.assetsService.unassign(id);
+  @ApiOperation({ summary: 'Desassocia um ativo de um funcionário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Ativo desassociado com sucesso.',
+  })
+  @ApiResponse({ status: 404, description: 'Ativo não encontrado.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Requisição inválida (ex: ativo não está em uso).',
+  })
+  disassociate(@Body() disassociateAssetDto: DisassociateAssetDto) {
+    return this.assetsService.disassociate(disassociateAssetDto);
   }
 }

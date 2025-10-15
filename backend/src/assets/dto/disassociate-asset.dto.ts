@@ -1,10 +1,6 @@
 import { IsString, IsUUID } from 'class-validator';
 
-export class AssignAssetDto {
-  @IsString()
-  @IsUUID()
-  employeeId: string;
-
+export class DisassociateAssetDto {
   @IsString()
   @IsUUID()
   assetId: string;

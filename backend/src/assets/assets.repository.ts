@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { AssetStatus, AssetType } from '@prisma/client';
@@ -62,6 +62,78 @@ export class AssetsRepository {
       },
     });
     return count > 0;
+  }
+
+  async findEmployeeWithAssets(employeeId: string) {
+    return this.prisma.employee.findUnique({
+      where: { id: employeeId },
+      include: {
+        assignments: {
+          where: { unassignedAt: null },
+          include: {
+            asset: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findAssetForAssociation(assetId: string) {
+    return this.prisma.asset.findUnique({
+      where: { id: assetId },
+    });
+  }
+
+  async assignAssetToEmployee(assetId: string, employeeId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const updatedAsset = await tx.asset.update({
+        where: { id: assetId },
+        data: { status: AssetStatus.EM_USO },
+      });
+
+      const assignment = await tx.assetAssignment.create({
+        data: {
+          assetId,
+          employeeId,
+        },
+      });
+
+      return { updatedAsset, assignment };
+    });
+  }
+
+  async disassociateAsset(assetId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const updatedAsset = await tx.asset.update({
+        where: { id: assetId },
+        data: { status: AssetStatus.DISPONIVEL },
+      });
+
+      const assignment = await tx.assetAssignment.updateMany({
+        where: {
+          assetId: assetId,
+          unassignedAt: null,
+        },
+        data: {
+          unassignedAt: new Date(),
+        },
+      });
+
+      return { updatedAsset, assignment };
+    });
+  }
+
+  async findAssetsByEmployeeId(employeeId: string) {
+    return this.prisma.asset.findMany({
+      where: {
+        assignments: {
+          some: {
+            employeeId: employeeId,
+            unassignedAt: null,
+          },
+        },
+      },
+    });
   }
 
   assign(assetId: string, employeeId: string) {

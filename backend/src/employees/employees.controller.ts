@@ -6,18 +6,23 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AssetsService } from 'src/assets/assets.service';
 
-@ApiTags('employees')
+@ApiTags('Employees')
 @Controller('employees')
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(
+    private readonly employeesService: EmployeesService,
+    private readonly assetsService: AssetsService, // Injetar AssetsService
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Criar um novo funcionário' })
@@ -76,5 +81,20 @@ export class EmployeesController {
   @ApiResponse({ status: 404, description: 'Funcionário não encontrado.' })
   remove(@Param('id') id: string) {
     return this.employeesService.remove(id);
+  }
+
+  @Get(':id/assets')
+  @ApiOperation({
+    summary: 'Lista todos os ativos associados a um funcionário',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de ativos retornada com sucesso.',
+  })
+  @ApiResponse({ status: 404, description: 'Funcionário não encontrado.' })
+  async findAssetsByEmployee(@Param('id', ParseUUIDPipe) id: string) {
+    // Verifica se o funcionário existe
+    await this.employeesService.findOne(id);
+    return this.assetsService.findAssetsByEmployee(id);
   }
 }

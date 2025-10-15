@@ -12,11 +12,12 @@ datasource db {
 
 model Company {
   id        String     @id @default(uuid())
-  name      String
+  name      String     @unique
   cnpj      String     @unique
   employees Employee[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Employee {
@@ -24,11 +25,12 @@ model Employee {
   name        String
   email       String            @unique
   cpf         String            @unique
-  companyId   String
   company     Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  assignments AssetAssignment[] // Relação com a tabela de associação
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  companyId   String
+  assignments AssetAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Asset {
@@ -36,21 +38,22 @@ model Asset {
   name        String
   type        AssetType
   status      AssetStatus       @default(DISPONIVEL)
-  assignments AssetAssignment[] // Relação com a tabela de associação
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  assignments AssetAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AssetAssignment {
-  id         String   @id @default(uuid())
-  assetId    String
-  employeeId String
-  asset      Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  assignedAt DateTime @default(now())
-  unassignedAt DateTime?
+  id           String    @id @default(uuid())
+  asset        Asset     @relation(fields: [assetId], references: [id])
+  assetId      String
+  employee     Employee  @relation(fields: [employeeId], references: [id])
+  employeeId   String
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime? // Fica nulo enquanto o ativo estiver associado
 
-  @@unique([assetId, employeeId], name: "asset_employee_unique_assignment")
+  @@unique([assetId, unassignedAt], name: "active_assignment_unique") // Garante que um ativo só pode ter uma associação ativa
 }
 
 enum AssetType {

@@ -1,21 +1,19 @@
 import {
-  BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
+  ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
+import { AssetsRepository } from './assets.repository';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
-import { AssetsRepository } from './assets.repository';
 import { AssetStatus, AssetType } from '@prisma/client';
-import { EmployeesRepository } from '../employees/employees.repository';
+import { AssignAssetDto } from './dto/assign-asset.dto';
+import { DisassociateAssetDto } from './dto/disassociate-asset.dto';
 
 @Injectable()
 export class AssetsService {
-  constructor(
-    private readonly repository: AssetsRepository,
-    private readonly employeesRepository: EmployeesRepository,
-  ) {}
+  constructor(private readonly repository: AssetsRepository) {}
 
   create(createAssetDto: CreateAssetDto) {
     return this.repository.create(createAssetDto);
@@ -48,40 +46,62 @@ export class AssetsService {
     return this.repository.remove(id);
   }
 
-  async assign(assetId: string, employeeId: string) {
-    const asset = await this.findOne(assetId);
-    if (asset.status !== AssetStatus.DISPONIVEL) {
-      throw new BadRequestException('O ativo não está disponível.');
-    }
+  async assign(assignAssetDto: AssignAssetDto) {
+    const { assetId, employeeId } = assignAssetDto;
 
-    const employee = await this.employeesRepository.findOne(employeeId);
+    // Busca o ativo e o funcionário (com seus ativos já associados)
+    const asset = await this.repository.findAssetForAssociation(assetId);
+    const employee = await this.repository.findEmployeeWithAssets(employeeId);
+
+    if (!asset) {
+      throw new NotFoundException(`Ativo com ID ${assetId} não encontrado.`);
+    }
     if (!employee) {
       throw new NotFoundException(
         `Funcionário com ID ${employeeId} não encontrado.`,
       );
     }
+    if (asset.status !== AssetStatus.DISPONIVEL) {
+      throw new ConflictException(
+        `O ativo '${asset.name}' não está disponível. Status atual: ${asset.status}.`,
+      );
+    }
 
+    // Um funcionário só pode ter um notebook
     if (asset.type === AssetType.NOTEBOOK) {
-      const hasNotebook = await this.repository.employeeHasAssetType(
-        employeeId,
-        AssetType.NOTEBOOK,
+      const hasNotebook = employee.assignments.some(
+        (assignment) => assignment.asset.type === AssetType.NOTEBOOK,
       );
       if (hasNotebook) {
-        throw new BadRequestException(
-          'O funcionário já possui um notebook associado.',
+        throw new ConflictException(
+          `O funcionário ${employee.name} já possui um notebook associado.`,
         );
       }
     }
 
-    return this.repository.assign(assetId, employeeId);
+    return this.repository.assignAssetToEmployee(assetId, employeeId);
   }
 
-  async unassign(assetId: string) {
-    const asset = await this.findOne(assetId);
-    if (asset.status !== AssetStatus.EM_USO) {
-      throw new BadRequestException('O ativo não está em uso.');
+  async disassociate(disassociateAssetDto: DisassociateAssetDto) {
+    const { assetId } = disassociateAssetDto;
+
+    // Valida se o ativo existe
+    const asset = await this.repository.findAssetForAssociation(assetId);
+    if (!asset) {
+      throw new NotFoundException(`Ativo com ID ${assetId} não encontrado.`);
     }
 
-    return this.repository.unassign(assetId);
+    // Valida se o ativo está realmente em uso
+    if (asset.status !== AssetStatus.EM_USO) {
+      throw new BadRequestException(
+        `O ativo '${asset.name}' não está em uso e não pode ser desassociado.`,
+      );
+    }
+
+    return this.repository.disassociateAsset(assetId);
+  }
+
+  async findAssetsByEmployee(employeeId: string) {
+    return this.repository.findAssetsByEmployeeId(employeeId);
   }
 }
