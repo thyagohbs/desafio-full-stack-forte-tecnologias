@@ -1,6 +1,6 @@
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -11,11 +11,15 @@ import { Employee } from '../../../../core/models/employee.model';
 import { EmployeeService } from '../../../../core/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EmployeeFormComponent } from '../../components/employee-form/employee-form.component';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { catchError, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-employee-list',
   templateUrl: './employee-list.component.html',
-  styles: [],
+  styleUrls: ['./employee-list.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -26,31 +30,51 @@ import { EmployeeFormComponent } from '../../components/employee-form/employee-f
     AsyncPipe,
     MatDialogModule,
     MatTooltipModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
 })
 export class EmployeeListComponent implements OnInit {
-  employees$: Observable<Employee[]>;
-  displayedColumns: string[] = ['name', 'email', 'company', 'actions'];
+  employees$!: Observable<Employee[]>;
+  displayedColumns: string[] = ['id', 'name', 'email', 'company', 'actions'];
+  searchControl = new FormControl('');
 
   constructor(
     private employeeService: EmployeeService,
     private dialog: MatDialog,
     private notificationService: NotificationService
-  ) {
-    this.employees$ = this.employeeService.employees$;
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadEmployees();
   }
 
   loadEmployees(): void {
-    this.employeeService.getAll().subscribe({
-      error: (err) => {
-        this.notificationService.showError('Erro ao carregar os funcionários.');
-        console.error(err);
-      },
-    });
+    this.employees$ = this.employeeService.getAll();
+  }
+
+  searchById(): void {
+    const searchTerm = this.searchControl.value?.trim();
+    if (!searchTerm) {
+      this.loadEmployees();
+      return;
+    }
+
+    this.employees$ = this.employeeService.getAll().pipe(
+      map((employees) =>
+        employees.filter((employee) => employee.id.startsWith(searchTerm))
+      ),
+      catchError(() => {
+        this.notificationService.showError('Erro ao buscar funcionários.');
+        return of([]);
+      })
+    );
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
+    this.loadEmployees();
   }
 
   openForm(employee?: Employee): void {
