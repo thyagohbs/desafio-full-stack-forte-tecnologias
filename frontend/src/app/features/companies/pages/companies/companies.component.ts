@@ -13,7 +13,7 @@ import { CompanyFormComponent } from '../../components/company-form/company-form
 })
 export class CompaniesComponent implements OnInit {
   companies: Company[] = [];
-  displayedColumns: string[] = ['name', 'cnpj', 'address', 'actions'];
+  displayedColumns: string[] = ['name', 'cnpj', 'actions'];
 
   constructor(
     private companyService: CompanyService,

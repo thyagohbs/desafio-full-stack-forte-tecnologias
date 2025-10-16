@@ -1,9 +1,6 @@
 <h2 mat-dialog-title>{{ isEditMode ? 'Editar Empresa' : 'Nova Empresa' }}</h2>
 <mat-dialog-content [formGroup]="form">
-  <mat-form-field appearance="fill" *ngIf="isEditMode">
-    <mat-label>ID</mat-label>
-    <input matInput [value]="displayId" readonly />
-  </mat-form-field>
+
 
   <mat-form-field appearance="fill">
     <mat-label>Nome</mat-label>
