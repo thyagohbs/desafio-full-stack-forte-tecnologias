@@ -1,20 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { switchMap, tap } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Company } from '../../../../core/models/company.model';
 import { Employee } from '../../../../core/models/employee.model';
 import { CompanyService } from '../../../../core/services/company.service';
 import { EmployeeService } from '../../../../core/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EmployeeFormComponent } from '../../../employees/components/employee-form/employee-form.component';
-import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
-import { EmployeeAssetListComponent } from '../../../employees/pages/employee-asset-list/employee-asset-list.component';
+import { EmployeeListComponent } from '../employee-list/employee-list.component';
 
 @Component({
   selector: 'app-company-detail',
   templateUrl: './company-detail.component.html',
   styleUrls: ['./company-detail.component.css'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    EmployeeListComponent,
+  ],
 })
 export class CompanyDetailComponent implements OnInit {
   company: Company | null = null;
@@ -25,45 +38,28 @@ export class CompanyDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private companyService: CompanyService,
     private employeeService: EmployeeService,
-    private notificationService: NotificationService,
-    public dialog: MatDialog
+    private dialog: MatDialog,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap
-      .pipe(
-        tap((params) => {
-          this.companyId = params.get('id')!;
-        }),
-        switchMap(() => this.companyService.getById(this.companyId)),
-        tap((company) => {
-          this.company = company;
-        }),
-        switchMap(() => this.employeeService.getAll(this.companyId))
-      )
-      .subscribe({
-        next: (employees) => {
-          this.employees = employees;
-        },
-        error: (err) => {
-          this.notificationService.showError(
-            'Erro ao carregar detalhes da empresa ou funcionários.'
-          );
-          console.error(err);
-        },
-      });
+    this.companyId = this.route.snapshot.paramMap.get('id')!;
+    this.loadCompanyDetails();
+    this.loadEmployees();
+  }
+
+  loadCompanyDetails(): void {
+    this.companyService.getById(this.companyId).subscribe((company) => {
+      this.company = company;
+    });
   }
 
   loadEmployees(): void {
-    this.employeeService.getAll(this.companyId).subscribe({
-      next: (employees) => {
+    this.employeeService
+      .getEmployeesByCompany(this.companyId)
+      .subscribe((employees) => {
         this.employees = employees;
-      },
-      error: (err) => {
-        this.notificationService.showError('Erro ao carregar funcionários.');
-        console.error(err);
-      },
-    });
+      });
   }
 
   openAddEmployeeDialog(): void {
@@ -74,7 +70,14 @@ export class CompanyDetailComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.loadEmployees();
+        this.employeeService
+          .create({ ...result, companyId: this.companyId })
+          .subscribe(() => {
+            this.notificationService.showSuccess(
+              'Funcionário criado com sucesso.'
+            );
+            this.loadEmployees();
+          });
       }
     });
   }
@@ -87,42 +90,31 @@ export class CompanyDetailComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.loadEmployees();
-      }
-    });
-  }
-
-  openDeleteEmployeeDialog(employeeId: string): void {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: {
-        title: 'Confirmar Exclusão',
-        message: 'Tem certeza de que deseja excluir este funcionário?',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.employeeService.delete(employeeId).subscribe({
-          next: () => {
-            this.notificationService.showSuccess(
-              'Funcionário excluído com sucesso!'
-            );
-            this.loadEmployees();
-          },
-          error: (err) => {
-            this.notificationService.showError(
-              err.error.message || 'Erro ao excluir funcionário.'
-            );
-          },
+        this.employeeService.update(employee.id, result).subscribe(() => {
+          this.notificationService.showSuccess(
+            'Funcionário atualizado com sucesso.'
+          );
+          this.loadEmployees();
         });
       }
     });
   }
 
-  openAssetManagement(employee: Employee): void {
-    this.dialog.open(EmployeeAssetListComponent, {
-      width: '800px',
-      data: { employeeId: employee.id, companyId: this.companyId },
-    });
+  openDeleteEmployeeDialog(employeeId: string): void {
+    if (confirm('Tem certeza que deseja excluir este funcionário?')) {
+      this.employeeService.delete(employeeId).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            'Funcionário excluído com sucesso.'
+          );
+          this.loadEmployees();
+        },
+        error: (err) => {
+          this.notificationService.showError(
+            err.error.message || 'Erro ao excluir funcionário.'
+          );
+        },
+      });
+    }
   }
 }

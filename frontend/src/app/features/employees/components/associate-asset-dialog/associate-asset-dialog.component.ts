@@ -32,17 +32,15 @@ export class AssociateAssetDialogComponent implements OnInit {
   }
 
   loadAvailableAssets(): void {
-    this.assetService
-      .getAvailableAssetsByCompany(this.data.companyId)
-      .subscribe((assets) => {
-        this.availableAssets = assets;
-      });
+    this.assetService.getAvailableAssets().subscribe((assets) => {
+      this.availableAssets = assets;
+    });
   }
 
   onSubmit(): void {
     if (this.form.valid) {
       this.assetService
-        .associateAssetToEmployee(this.data.employeeId, this.form.value.assetId)
+        .associateAsset(this.form.value.assetId, this.data.employeeId)
         .subscribe({
           next: () => {
             this.dialogRef.close(true);

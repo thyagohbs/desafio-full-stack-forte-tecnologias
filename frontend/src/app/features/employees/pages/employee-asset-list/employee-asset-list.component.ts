@@ -1,4 +1,11 @@
 import { Component, OnInit, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -15,6 +22,15 @@ import { AssetService } from '../../../../core/services/asset.service';
   selector: 'app-employee-asset-list',
   templateUrl: './employee-asset-list.component.html',
   styleUrls: ['./employee-asset-list.component.css'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatListModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+  ],
 })
 export class EmployeeAssetListComponent implements OnInit {
   assets: Asset[] = [];

@@ -4,12 +4,42 @@ import { Observable } from 'rxjs';
 import { Company } from '../../../../core/models/company.model';
 import { CompanyService } from '../../../../core/services/company.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { CompanyFormComponent } from '../../components/company-form/company-form.component';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterModule } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-company-list',
   templateUrl: './company-list.component.html',
-  styleUrls: ['./company-list.component.scss'],
+  styles: [
+    `
+      .container {
+        margin: 20px;
+      }
+      table {
+        width: 100%;
+      }
+      .mat-mdc-header-cell {
+        background-color: #f5f5f5;
+      }
+    `,
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatTooltipModule,
+    RouterModule,
+    MatToolbarModule,
+  ],
 })
 export class CompanyListComponent implements OnInit {
   companies$: Observable<Company[]>;

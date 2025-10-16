@@ -1,5 +1,4 @@
 import { MatDialogModule } from '@angular/material/dialog';
-import { CompanyListComponent } from './pages/company-list/company-list.component';
 import { MatIconModule } from '@angular/material/icon';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,13 +12,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
-import { EmployeeFormComponent } from '../employees/components/employee-form/employee-form.component';
 @NgModule({
-  declarations: [
-    CompanyListComponent,
-    EmployeeListComponent,
-    EmployeeFormComponent,
-  ],
+  declarations: [EmployeeListComponent],
   imports: [
     CommonModule,
     CompaniesRoutingModule,

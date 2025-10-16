@@ -1,19 +1,22 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Asset } from '../models/asset.model';
 import {
   CreateEmployeeDto,
   Employee,
   UpdateEmployeeDto,
 } from '../models/employee.model';
-import { environment } from '../../../environments/environment';
-import { Asset } from '../models/asset.model';
-
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
 export class EmployeeService {
   private apiUrl = `${environment.apiUrl}/employees`;
+
+  private employeesSubject = new BehaviorSubject<Employee[]>([]);
+  public employees$: Observable<Employee[]> =
+    this.employeesSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -38,7 +41,11 @@ export class EmployeeService {
     if (companyId) {
       params = params.set('companyId', companyId);
     }
-    return this.http.get<Employee[]>(this.apiUrl, { params });
+    return this.http.get<Employee[]>(this.apiUrl, { params }).pipe(
+      tap((employees) => {
+        this.employeesSubject.next(employees);
+      })
+    );
   }
 
   getById(id: string): Observable<Employee> {
@@ -46,14 +53,26 @@ export class EmployeeService {
   }
 
   create(employee: CreateEmployeeDto): Observable<Employee> {
-    return this.http.post<Employee>(this.apiUrl, employee);
+    return this.http.post<Employee>(this.apiUrl, employee).pipe(
+      tap(() => {
+        this.getAll().subscribe();
+      })
+    );
   }
 
   update(id: string, employee: UpdateEmployeeDto): Observable<Employee> {
-    return this.http.patch<Employee>(`${this.apiUrl}/${id}`, employee);
+    return this.http.patch<Employee>(`${this.apiUrl}/${id}`, employee).pipe(
+      tap(() => {
+        this.getAll().subscribe();
+      })
+    );
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        this.getAll().subscribe();
+      })
+    );
   }
 }

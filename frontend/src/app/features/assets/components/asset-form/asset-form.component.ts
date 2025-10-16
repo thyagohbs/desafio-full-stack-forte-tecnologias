@@ -1,25 +1,43 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { Asset } from '../../../../core/models/asset.model';
 import { AssetService } from '../../../../core/services/asset.service';
-import { NotificationService } from '../../../../core/services/notification.service';
+import {
+  MatDialogModule,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-asset-form',
   templateUrl: './asset-form.component.html',
   styleUrls: ['./asset-form.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDialogModule,
+  ],
 })
 export class AssetFormComponent implements OnInit {
   form: FormGroup;
   isEditMode: boolean;
-  assetTypes: string[] = [
-    'Notebook',
-    'Monitor',
-    'Teclado',
-    'Mouse',
-    'Acessório',
-  ];
+  assetTypes: string[] = ['NOTEBOOK', 'MONITOR', 'TECLADO', 'MOUSE'];
 
   constructor(
     private fb: FormBuilder,
@@ -30,17 +48,12 @@ export class AssetFormComponent implements OnInit {
   ) {
     this.isEditMode = !!this.data;
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      tag: ['', Validators.required],
-      type: ['', Validators.required],
+      name: [this.data?.name || '', Validators.required],
+      type: [this.data?.type || '', Validators.required],
     });
   }
 
-  ngOnInit(): void {
-    if (this.isEditMode) {
-      this.form.patchValue(this.data);
-    }
-  }
+  ngOnInit(): void {}
 
   save(): void {
     if (this.form.invalid) {
@@ -49,22 +62,29 @@ export class AssetFormComponent implements OnInit {
 
     const assetData = this.form.value;
 
-    const operation$ = this.isEditMode
-      ? this.assetService.update(this.data.id, assetData)
-      : this.assetService.create(assetData);
-
-    const message = this.isEditMode ? 'atualizado' : 'criado';
-
-    operation$.subscribe({
-      next: () => {
-        this.notificationService.showSuccess(`Ativo ${message} com sucesso!`);
-        this.dialogRef.close(true);
-      },
-      error: () =>
-        this.notificationService.showError(
-          `Erro ao ${this.isEditMode ? 'atualizar' : 'criar'} ativo.`
-        ),
-    });
+    if (this.isEditMode) {
+      this.assetService.update(this.data.id, assetData).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Ativo atualizado com sucesso!');
+          this.dialogRef.close(true);
+        },
+        error: (err) =>
+          this.notificationService.showError(
+            err.error.message || 'Erro ao atualizar ativo.'
+          ),
+      });
+    } else {
+      this.assetService.create(assetData).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Ativo criado com sucesso!');
+          this.dialogRef.close(true);
+        },
+        error: (err) =>
+          this.notificationService.showError(
+            err.error.message || 'Erro ao criar ativo.'
+          ),
+      });
+    }
   }
 
   close(): void {
