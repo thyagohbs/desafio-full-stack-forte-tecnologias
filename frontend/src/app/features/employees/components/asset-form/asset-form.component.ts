@@ -12,7 +12,7 @@ import { switchMap } from 'rxjs';
 })
 export class AssetFormComponent {
   form: FormGroup;
-  assetTypes = ['NOTEBOOK', 'MONITOR', 'TECLADO', 'MOUSE'];
+  assetTypes = ['NOTEBOOK', 'MONITOR', 'CELULAR'];
 
   constructor(
     private fb: FormBuilder,

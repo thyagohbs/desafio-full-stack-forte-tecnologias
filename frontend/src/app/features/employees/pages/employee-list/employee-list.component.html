@@ -22,8 +22,9 @@
     <button mat-button (click)="clearSearch()">Limpar Busca</button>
   </div>
 
-  <div class="mat-elevation-z8 content">
-    @if (employees$ | async; as employees) {
+  <mat-card>
+    <mat-card-content>
+      @if (employees$ | async; as employees) {
       <table mat-table [dataSource]="employees" class="full-width-table">
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef>ID</th>
@@ -82,5 +83,6 @@
         <p>Nenhum funcionário para exibir.</p>
       </div>
     }
-  </div>
+    </mat-card-content>
+  </mat-card>
 </div>

@@ -1,15 +1,12 @@
 
-.container {
-  padding: 24px;
-}
-
-.header {
+.search-container {
   display: flex;
-  justify-content: space-between;
+  gap: 16px;
   align-items: center;
-  margin-bottom: 24px;
-}
+  padding: 16px;
+  margin: 0 16px;
 
-mat-table {
-  width: 100%;
+  mat-form-field {
+    flex-grow: 1;
+  }
 }

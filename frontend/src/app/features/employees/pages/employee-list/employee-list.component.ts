@@ -1,6 +1,7 @@
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Component, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { MatCardModule } from '@angular/material/card';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -33,6 +34,7 @@ import { catchError, map } from 'rxjs/operators';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatCardModule,
   ],
 })
 export class EmployeeListComponent implements OnInit {

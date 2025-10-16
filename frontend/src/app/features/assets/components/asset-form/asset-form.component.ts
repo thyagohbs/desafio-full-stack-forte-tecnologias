@@ -37,7 +37,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 export class AssetFormComponent implements OnInit {
   assetForm: FormGroup;
   isEditMode: boolean;
-  assetTypes: string[] = ['NOTEBOOK', 'MONITOR', 'TECLADO', 'MOUSE'];
+  assetTypes: string[] = ['NOTEBOOK', 'MONITOR', 'CELULAR'];
 
   constructor(
     private fb: FormBuilder,
