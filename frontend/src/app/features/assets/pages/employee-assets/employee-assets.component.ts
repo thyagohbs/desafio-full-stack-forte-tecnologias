@@ -1,4 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Asset } from '../../../../core/models/asset.model';
@@ -11,6 +17,15 @@ import { NotificationService } from '../../../../core/services/notification.serv
   selector: 'app-employee-assets',
   templateUrl: './employee-assets.component.html',
   styleUrls: ['./employee-assets.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatListModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+  ],
 })
 export class EmployeeAssetsComponent implements OnInit {
   employee: Employee | null = null;

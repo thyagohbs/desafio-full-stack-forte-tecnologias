@@ -1,6 +1,12 @@
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTableModule } from '@angular/material/table';
 import { Employee } from '../../../../core/models/employee.model';
 import { EmployeeService } from '../../../../core/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -9,7 +15,18 @@ import { EmployeeFormComponent } from '../../components/employee-form/employee-f
 @Component({
   selector: 'app-employee-list',
   templateUrl: './employee-list.component.html',
-  styleUrls: ['./employee-list.component.scss'],
+  styles: [],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    AsyncPipe,
+    MatDialogModule,
+    MatTooltipModule,
+  ],
 })
 export class EmployeeListComponent implements OnInit {
   employees$: Observable<Employee[]>;

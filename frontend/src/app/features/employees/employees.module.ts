@@ -16,17 +16,15 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 
 import { EmployeesRoutingModule } from './employees-routing.module';
-import { EmployeeListComponent } from './pages/employee-list/employee-list.component';
-import { EmployeeFormComponent } from './components/employee-form/employee-form.component';
-import { EmployeeAssetListComponent } from './pages/employee-asset-list/employee-asset-list.component';
-import { AssetFormComponent } from './components/asset-form/asset-form.component';
-import { AssociateAssetDialogComponent } from './components/associate-asset-dialog/associate-asset-dialog.component';
 import { EmployeesComponent } from './pages/employees/employees.component';
+import { EmployeeAssetListComponent } from './pages/employee-asset-list/employee-asset-list.component';
+import { AssociateAssetDialogComponent } from './components/associate-asset-dialog/associate-asset-dialog.component';
+import { AssetFormComponent } from './components/asset-form/asset-form.component';
+import { EmployeeFormComponent } from './components/employee-form/employee-form.component';
 
 @NgModule({
   declarations: [
     EmployeesComponent,
-    EmployeeListComponent,
     EmployeeAssetListComponent,
     AssociateAssetDialogComponent,
     AssetFormComponent,

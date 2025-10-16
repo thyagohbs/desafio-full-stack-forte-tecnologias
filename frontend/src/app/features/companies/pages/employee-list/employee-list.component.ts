@@ -13,6 +13,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EmployeeService } from '../../../../core/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { CompanyFormComponent } from '../../components/company-form/company-form.component';
 
 @Component({
   selector: 'app-employee-list',

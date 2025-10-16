@@ -1,14 +1,35 @@
-import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Asset } from '../../../../core/models/asset.model';
 import { AssetService } from '../../../../core/services/asset.service';
+import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  MatDialogModule,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { NotificationService } from '../../../../core/services/notification.service';
-
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-associate-asset-dialog',
   templateUrl: './associate-asset-dialog.component.html',
   styleUrls: ['./associate-asset-dialog.component.css'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDialogModule,
+  ],
 })
 export class AssociateAssetDialogComponent implements OnInit {
   @Output() assetAssociated = new EventEmitter<void>();

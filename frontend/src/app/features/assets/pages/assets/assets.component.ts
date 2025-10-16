@@ -1,15 +1,31 @@
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTableModule } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { AssetService } from '../../../../core/services/asset.service';
 import { Observable } from 'rxjs';
 import { Asset } from '../../../../core/models/asset.model';
-import { AssetService } from '../../../../core/services/asset.service';
-import { NotificationService } from '../../../../core/services/notification.service';
 import { AssetFormComponent } from '../../components/asset-form/asset-form.component';
+import { AsyncPipe } from '@angular/common';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-assets',
   templateUrl: './assets.component.html',
   styleUrls: ['./assets.component.scss'],
+  standalone: true,
+  imports: [
+    MatCardModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatTableModule,
+    MatIconModule,
+    AsyncPipe,
+    MatDialogModule,
+  ],
 })
 export class AssetsComponent implements OnInit {
   assets$: Observable<Asset[]>;
@@ -36,10 +52,16 @@ export class AssetsComponent implements OnInit {
     });
   }
 
-  openForm(asset?: Asset): void {
+  openAssetForm(asset?: Asset): void {
     const dialogRef = this.dialog.open(AssetFormComponent, {
       width: '400px',
-      data: asset,
+      data: { asset: asset },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadAssets();
+      }
     });
   }
 

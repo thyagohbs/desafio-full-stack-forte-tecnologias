@@ -19,7 +19,7 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-company-form',
   templateUrl: './company-form.component.html',
-  styleUrls: ['./company-form.component.css'],
+  styles: [],
   standalone: true,
   imports: [
     CommonModule,

@@ -1,10 +1,9 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTableModule } from '@angular/material/table';
+import { RouterModule } from '@angular/router';
 
 import {
   MAT_DIALOG_DATA,
@@ -14,9 +13,10 @@ import {
 import { Asset } from '../../../../core/models/asset.model';
 import { EmployeeService } from '../../../../core/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { AssetFormComponent } from '../../components/asset-form/asset-form.component';
+import { AssetFormComponent } from '../../../assets/components/asset-form/asset-form.component';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { AssetService } from '../../../../core/services/asset.service';
+import { AssociateAssetDialogComponent } from '../../components/associate-asset-dialog/associate-asset-dialog.component';
 
 @Component({
   selector: 'app-employee-asset-list',
@@ -25,18 +25,17 @@ import { AssetService } from '../../../../core/services/asset.service';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatListModule,
     MatButtonModule,
     MatIconModule,
-    MatToolbarModule,
+    MatTableModule,
+    RouterModule,
   ],
 })
 export class EmployeeAssetListComponent implements OnInit {
   assets: Asset[] = [];
   employeeId: string;
   companyId: string;
-  displayedColumns: string[] = ['name', 'type', 'status', 'actions'];
+  displayedColumns: string[] = ['name', 'type', 'description', 'actions'];
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -68,9 +67,25 @@ export class EmployeeAssetListComponent implements OnInit {
     });
   }
 
-  openAddAssetDialog(): void {
+  openCreateAssetDialog(): void {
     const dialogRef = this.dialog.open(AssetFormComponent, {
       width: '400px',
+      data: {
+        employeeId: this.employeeId,
+        companyId: this.companyId,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadAssets();
+      }
+    });
+  }
+
+  openAssociateAssetDialog(): void {
+    const dialogRef = this.dialog.open(AssociateAssetDialogComponent, {
+      width: '500px',
       data: {
         employeeId: this.employeeId,
         companyId: this.companyId,

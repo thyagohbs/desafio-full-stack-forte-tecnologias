@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { CompanyFormComponent } from '../../components/company-form/company-form.component';
 
 @Component({
   selector: 'app-company-list',
