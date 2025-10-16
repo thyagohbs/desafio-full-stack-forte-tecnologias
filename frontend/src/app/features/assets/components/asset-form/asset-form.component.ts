@@ -1,22 +1,23 @@
-import { NotificationService } from '../../../../core/services/notification.service';
-import { Asset } from '../../../../core/models/asset.model';
-import { AssetService } from '../../../../core/services/asset.service';
-import {
-  MatDialogModule,
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-} from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
-  ReactiveFormsModule,
   Validators,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { Component, Inject, OnInit } from '@angular/core';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { CommonModule } from '@angular/common';
+import { Asset } from '../../../../core/models/asset.model';
+import { AssetService } from '../../../../core/services/asset.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-asset-form',
@@ -24,44 +25,56 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./asset-form.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
-    MatDialogModule,
+    MatSelectModule,
   ],
 })
 export class AssetFormComponent implements OnInit {
-  form: FormGroup;
+  assetForm: FormGroup;
   isEditMode: boolean;
   assetTypes: string[] = ['NOTEBOOK', 'MONITOR', 'TECLADO', 'MOUSE'];
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AssetFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Asset,
+    public dialogRef: MatDialogRef<AssetFormComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { asset: Asset },
     private assetService: AssetService,
     private notificationService: NotificationService
   ) {
-    this.isEditMode = !!this.data;
-    this.form = this.fb.group({
-      name: [this.data?.name || '', Validators.required],
-      type: [this.data?.type || '', Validators.required],
+    this.isEditMode = !!data.asset; // Verifica se um ativo foi passado para o diálogo
+
+    this.assetForm = this.fb.group({
+      name: [this.isEditMode ? data.asset.name : '', Validators.required],
+      type: [this.isEditMode ? data.asset.type : '', Validators.required],
     });
   }
 
   ngOnInit(): void {}
 
+  onCancel(): void {
+    this.dialogRef.close();
+  }
+
+  onSave(): void {
+    if (this.assetForm.valid) {
+      this.dialogRef.close(this.assetForm.value);
+    }
+  }
+
   save(): void {
-    if (this.form.invalid) {
+    if (this.assetForm.invalid) {
       return;
     }
 
-    const assetData = this.form.value;
+    const assetData = this.assetForm.value;
 
     if (this.isEditMode) {
-      this.assetService.update(this.data.id, assetData).subscribe({
+      this.assetService.update(this.data.asset.id, assetData).subscribe({
         next: () => {
           this.notificationService.showSuccess('Ativo atualizado com sucesso!');
           this.dialogRef.close(true);
@@ -83,9 +96,5 @@ export class AssetFormComponent implements OnInit {
           ),
       });
     }
-  }
-
-  close(): void {
-    this.dialogRef.close();
   }
 }
