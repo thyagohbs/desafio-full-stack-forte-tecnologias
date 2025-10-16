@@ -18,14 +18,6 @@
       CNPJ deve conter 14 dígitos numéricos.
     </mat-error>
   </mat-form-field>
-
-  <mat-form-field appearance="fill">
-    <mat-label>Endereço</mat-label>
-    <input matInput formControlName="address" required />
-    <mat-error *ngIf="form.get('address')?.hasError('required')">
-      Endereço é obrigatório.
-    </mat-error>
-  </mat-form-field>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCancel()">Cancelar</button>

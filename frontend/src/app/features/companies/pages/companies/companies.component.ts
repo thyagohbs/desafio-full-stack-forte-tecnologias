@@ -17,9 +17,9 @@ export class CompaniesComponent implements OnInit {
 
   constructor(
     private companyService: CompanyService,
-    public dialog: MatDialog,
-    private router: Router,
-    private notificationService: NotificationService
+    private dialog: MatDialog,
+    private notificationService: NotificationService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -27,15 +27,21 @@ export class CompaniesComponent implements OnInit {
   }
 
   loadCompanies(): void {
-    this.companyService.getAll().subscribe((companies) => {
-      this.companies = companies;
+    this.companyService.getAll().subscribe({
+      next: (data) => {
+        this.companies = data;
+      },
+      error: (err) => {
+        this.notificationService.showError('Erro ao carregar as empresas.');
+        console.error(err);
+      },
     });
   }
 
   openCompanyForm(company?: Company): void {
     const dialogRef = this.dialog.open(CompanyFormComponent, {
       width: '400px',
-      data: { company },
+      data: company,
     });
 
     dialogRef.afterClosed().subscribe((result) => {

@@ -63,14 +63,24 @@ export class CompanyListComponent implements OnInit {
     });
   }
 
+  loadCompanies(): void {
+    this.companyService.getAll().subscribe({
+      error: (err) => {
+        this.notificationService.showError('Erro ao carregar as empresas.');
+        console.error(err);
+      },
+    });
+  }
+
   openForm(company?: Company): void {
     const dialogRef = this.dialog.open(CompanyFormComponent, {
       width: '400px',
-      data: company,
+      data: { company },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        this.loadCompanies();
         const message = company
           ? 'Empresa atualizada com sucesso.'
           : 'Empresa criada com sucesso.';

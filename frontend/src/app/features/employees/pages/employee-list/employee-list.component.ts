@@ -41,6 +41,10 @@ export class EmployeeListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadEmployees();
+  }
+
+  loadEmployees(): void {
     this.employeeService.getAll().subscribe({
       error: (err) => {
         this.notificationService.showError('Erro ao carregar os funcionários.');
@@ -52,15 +56,29 @@ export class EmployeeListComponent implements OnInit {
   openForm(employee?: Employee): void {
     const dialogRef = this.dialog.open(EmployeeFormComponent, {
       width: '400px',
-      data: employee,
+      data: { employee: employee },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        const message = employee
-          ? 'Funcionário atualizado com sucesso.'
-          : 'Funcionário criado com sucesso.';
-        this.notificationService.showSuccess(message);
+        const operation = employee
+          ? this.employeeService.update(employee.id, result)
+          : this.employeeService.create(result);
+
+        operation.subscribe({
+          next: () => {
+            const message = employee
+              ? 'Funcionário atualizado com sucesso.'
+              : 'Funcionário criado com sucesso.';
+            this.notificationService.showSuccess(message);
+            this.loadEmployees();
+          },
+          error: (err) => {
+            const errorMessage =
+              err.error?.message || 'Ocorreu um erro na operação.';
+            this.notificationService.showError(errorMessage);
+          },
+        });
       }
     });
   }
@@ -72,6 +90,7 @@ export class EmployeeListComponent implements OnInit {
           this.notificationService.showSuccess(
             'Funcionário excluído com sucesso.'
           );
+          this.loadEmployees();
         },
         error: (err) => {
           const errorMessage =

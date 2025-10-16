@@ -65,37 +65,16 @@ export class EmployeesComponent implements OnInit {
   openEmployeeForm(employee?: Employee): void {
     const dialogRef = this.dialog.open(EmployeeFormComponent, {
       width: '400px',
-      data: { employee },
+      data: { employee: employee, companyId: this.companyId },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        if (employee) {
-          this.employeeService.update(employee.id, result).subscribe({
-            next: () => {
-              this.notificationService.showSuccess(
-                'Funcionário atualizado com sucesso!'
-              );
-              this.loadEmployees();
-            },
-            error: () =>
-              this.notificationService.showError(
-                'Erro ao atualizar funcionário.'
-              ),
-          });
-        } else {
-          const newEmployee = { ...result, companyId: this.companyId };
-          this.employeeService.create(newEmployee).subscribe({
-            next: () => {
-              this.notificationService.showSuccess(
-                'Funcionário criado com sucesso!'
-              );
-              this.loadEmployees();
-            },
-            error: () =>
-              this.notificationService.showError('Erro ao criar funcionário.'),
-          });
-        }
+        const message = employee
+          ? 'Funcionário atualizado com sucesso.'
+          : 'Funcionário criado com sucesso.';
+        this.notificationService.showSuccess(message);
+        this.loadEmployees();
       }
     });
   }
