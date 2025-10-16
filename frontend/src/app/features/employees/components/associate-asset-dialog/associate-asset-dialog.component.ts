@@ -20,7 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-associate-asset-dialog',
   templateUrl: './associate-asset-dialog.component.html',
-  styleUrls: ['./associate-asset-dialog.component.css'],
+  styleUrls: ['./associate-asset-dialog.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -33,7 +33,7 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class AssociateAssetDialogComponent implements OnInit {
   @Output() assetAssociated = new EventEmitter<void>();
-  form: FormGroup;
+  associateForm: FormGroup;
   availableAssets: Asset[] = [];
 
   constructor(
@@ -43,7 +43,7 @@ export class AssociateAssetDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private notificationService: NotificationService
   ) {
-    this.form = this.fb.group({
+    this.associateForm = this.fb.group({
       assetId: ['', Validators.required],
     });
   }
@@ -59,9 +59,9 @@ export class AssociateAssetDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.valid) {
+    if (this.associateForm.valid) {
       this.assetService
-        .associateAsset(this.form.value.assetId, this.data.employeeId)
+        .associateAsset(this.associateForm.value.assetId, this.data.employeeId)
         .subscribe({
           next: () => {
             this.dialogRef.close(true);

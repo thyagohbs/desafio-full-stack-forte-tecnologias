@@ -1,66 +1,62 @@
 @if (employee) {
 <div class="container">
-  <h1>Ativos de {{ employee.name }}</h1>
+  <div class="header">
+    <h1>Ativos de {{ employee.name }}</h1>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openAssociateAssetDialog()"
+    >
+      <mat-icon>add</mat-icon>
+      Associar Novo Ativo
+    </button>
+  </div>
 
-  <div class="lists-container">
-    <!-- Associated Assets List -->
-    <mat-card class="asset-list">
-      <mat-card-header>
-        <mat-card-title>Ativos Associados</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-list>
-          @for (asset of associatedAssets; track asset.id) {
-          <mat-list-item>
-            <span matListItemTitle>{{ asset.name }} ({{ asset.type }})</span>
-            <span matListItemLine>Tag: {{ asset.tag }}</span>
+  @if (associatedAssets.length > 0) {
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Ativos Associados</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-list role="list">
+        @for (asset of associatedAssets; track asset.id) {
+        <mat-list-item role="listitem">
+          <mat-icon matListItemIcon>{{
+            asset.type === 'Notebook'
+              ? 'laptop'
+              : asset.type === 'Monitor'
+              ? 'desktop_windows'
+              : 'devices'
+          }}</mat-icon>
+          <div matListItemTitle>{{ asset.name }}</div>
+          <div matListItemLine>
+            Tipo: {{ asset.type }} | Status: {{ asset.status }}
+          </div>
+          <div matListItemMeta>
             <button
               mat-icon-button
               color="warn"
-              (click)="disassociateAsset(asset.id)"
-              matTooltip="Desassociar"
+              (click)="dissociateAsset(asset.id)"
+              matTooltip="Desassociar Ativo"
             >
               <mat-icon>link_off</mat-icon>
             </button>
-          </mat-list-item>
-          } @empty {
-          <p>Nenhum ativo associado.</p>
-          }
-        </mat-list>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Available Assets List -->
-    <mat-card class="asset-list">
-      <mat-card-header>
-        <mat-card-title>Ativos Disponíveis</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-list>
-          @for (asset of availableAssets; track asset.id) {
-          <mat-list-item>
-            <span matListItemTitle>{{ asset.name }} ({{ asset.type }})</span>
-            <span matListItemLine>Tag: {{ asset.tag }}</span>
-            <button
-              mat-icon-button
-              color="primary"
-              (click)="associateAsset(asset.id)"
-              [disabled]="hasNotebook && asset.type.toLowerCase() === 'notebook'"
-              matTooltip="{{
-                hasNotebook && asset.type.toLowerCase() === 'notebook'
-                  ? 'Funcionário já possui um notebook'
-                  : 'Associar'
-              }}"
-            >
-              <mat-icon>add_link</mat-icon>
-            </button>
-          </mat-list-item>
-          } @empty {
-          <p>Nenhum ativo disponível.</p>
-          }
-        </mat-list>
-      </mat-card-content>
-    </mat-card>
-  </div>
+          </div>
+        </mat-list-item>
+        }
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+  } @else {
+  <mat-card class="no-assets-card">
+    <mat-card-content>
+      <p>Este funcionário não possui ativos associados no momento.</p>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>
+} @else {
+<div class="loading-container">
+  <p>Carregando dados do funcionário...</p>
 </div>
 }

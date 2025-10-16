@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Company } from '../../../../core/models/company.model';
+import { MatDialog } from '@angular/material/dialog';
 import { Employee } from '../../../../core/models/employee.model';
-import { CompanyService } from '../../../../core/services/company.service';
+import { Company } from '../../../../core/models/company.model';
 import { EmployeeService } from '../../../../core/services/employee.service';
+import { CompanyService } from '../../../../core/services/company.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { EmployeeFormComponent } from '../../components/employee-form/employee-form.component';
+import { of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-employees',
@@ -21,85 +22,92 @@ export class EmployeesComponent implements OnInit {
   displayedColumns: string[] = ['name', 'email', 'cpf', 'position', 'actions'];
 
   constructor(
+    private route: ActivatedRoute,
+    private router: Router,
     private employeeService: EmployeeService,
     private companyService: CompanyService,
     private notificationService: NotificationService,
-    private route: ActivatedRoute,
-    private router: Router,
     private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      this.companyId = params.get('companyId');
-      this.loadEmployees();
-      if (this.companyId) {
-        this.loadCompanyDetails();
-      }
+    this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          this.companyId = params.get('companyId');
+          if (this.companyId) {
+            this.loadCompanyDetails(this.companyId);
+            return this.employeeService.getEmployeesByCompany(this.companyId);
+          }
+          return this.employeeService.getAll();
+        }),
+        catchError(() => {
+          this.notificationService.showError('Erro ao carregar funcionários.');
+          return of([]);
+        })
+      )
+      .subscribe((employees) => {
+        this.employees = employees;
+      });
+  }
+
+  loadCompanyDetails(companyId: string): void {
+    this.companyService.getById(companyId).subscribe((company) => {
+      this.company = company;
     });
   }
 
   loadEmployees(): void {
-    this.employeeService.getAll(this.companyId ?? undefined).subscribe({
-      next: (data) => (this.employees = data),
-      error: (err) =>
-        this.notificationService.showError('Erro ao carregar os funcionários.'),
-    });
-  }
+    const source$ = this.companyId
+      ? this.employeeService.getEmployeesByCompany(this.companyId)
+      : this.employeeService.getAll();
 
-  loadCompanyDetails(): void {
-    if (!this.companyId) return;
-    this.companyService.getById(this.companyId).subscribe({
-      next: (data) => (this.company = data),
-      error: (err) =>
-        this.notificationService.showError(
-          'Erro ao carregar detalhes da empresa.'
-        ),
-    });
-  }
-
-  viewAssets(employee: Employee): void {
-    this.router.navigate(['/employees', employee.id, 'assets']);
+    source$
+      .pipe(
+        catchError(() => {
+          this.notificationService.showError(
+            'Erro ao recarregar funcionários.'
+          );
+          return of([]);
+        })
+      )
+      .subscribe((employees) => {
+        this.employees = employees;
+      });
   }
 
   openEmployeeForm(employee?: Employee): void {
+    if (!this.companyId) return;
+
     const dialogRef = this.dialog.open(EmployeeFormComponent, {
-      width: '400px',
-      data: { employee: employee, companyId: this.companyId },
+      width: '450px',
+      data: { employee, companyId: this.companyId },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        const message = employee
-          ? 'Funcionário atualizado com sucesso.'
-          : 'Funcionário criado com sucesso.';
-        this.notificationService.showSuccess(message);
         this.loadEmployees();
       }
     });
   }
 
   deleteEmployee(employee: Employee): void {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: {
-        title: 'Confirmar Exclusão',
-        message: `Tem certeza que deseja excluir o funcionário ${employee.name}?`,
-      },
-    });
+    if (confirm(`Tem certeza que deseja remover ${employee.name}?`)) {
+      this.employeeService.delete(employee.id).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            'Funcionário removido com sucesso!'
+          );
+          this.loadEmployees();
+        },
+        error: () => {
+          this.notificationService.showError('Erro ao remover funcionário.');
+        },
+      });
+    }
+  }
 
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.employeeService.delete(employee.id).subscribe({
-          next: () => {
-            this.notificationService.showSuccess(
-              'Funcionário excluído com sucesso!'
-            );
-            this.loadEmployees();
-          },
-          error: () =>
-            this.notificationService.showError('Erro ao excluir funcionário.'),
-        });
-      }
-    });
+  viewAssets(employee: Employee): void {
+    this.router.navigate(['/employees', employee.id, 'assets']);
   }
 }

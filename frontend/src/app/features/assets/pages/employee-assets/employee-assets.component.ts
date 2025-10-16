@@ -1,17 +1,20 @@
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { Asset } from '../../../../core/models/asset.model';
-import { Employee } from '../../../../core/models/employee.model';
-import { AssetService } from '../../../../core/services/asset.service';
 import { EmployeeService } from '../../../../core/services/employee.service';
+import { AssetService } from '../../../../core/services/asset.service';
+import { Employee } from '../../../../core/models/employee.model';
+import { Asset } from '../../../../core/models/asset.model';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
+import { AssociateAssetDialogComponent } from '../../../employees/components/associate-asset-dialog/associate-asset-dialog.component';
 
 @Component({
   selector: 'app-employee-assets',
@@ -25,77 +28,95 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    MatDialogModule,
+    AssociateAssetDialogComponent,
   ],
 })
 export class EmployeeAssetsComponent implements OnInit {
   employee: Employee | null = null;
-  employeeId!: string;
   associatedAssets: Asset[] = [];
-  availableAssets: Asset[] = [];
-  hasNotebook = false;
+  employeeId!: string;
 
   constructor(
     private route: ActivatedRoute,
     private employeeService: EmployeeService,
     private assetService: AssetService,
+    private dialog: MatDialog,
     private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
-    this.employeeId = this.route.snapshot.paramMap.get('id')!;
-    this.loadData();
-  }
-
-  loadData(): void {
-    const employee$ = this.employeeService.getById(this.employeeId);
-    const associatedAssets$ = this.assetService.getAssetsByEmployee(
-      this.employeeId
-    );
-    const availableAssets$ = this.assetService.getAvailableAssets();
-
-    forkJoin({
-      employee: employee$,
-      associated: associatedAssets$,
-      available: availableAssets$,
-    }).subscribe({
-      next: ({ employee, associated, available }) => {
+    this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          const id = params.get('employeeId');
+          if (!id) {
+            this.notificationService.showError(
+              'ID do funcionário não encontrado.'
+            );
+            return of([null, []] as [Employee | null, Asset[]]);
+          }
+          this.employeeId = id;
+          return forkJoin([
+            this.employeeService.getById(this.employeeId),
+            this.assetService.getAssetsByEmployee(this.employeeId),
+          ]);
+        }),
+        catchError(() => {
+          this.notificationService.showError(
+            'Erro ao carregar dados do funcionário e ativos.'
+          );
+          return of([null, []] as [Employee | null, Asset[]]);
+        })
+      )
+      .subscribe(([employee, assets]) => {
         this.employee = employee;
-        this.associatedAssets = associated;
-        this.availableAssets = available;
-        this.checkIfHasNotebook();
-      },
-      error: () =>
-        this.notificationService.showError('Erro ao carregar dados.'),
+        this.associatedAssets = assets;
+      });
+  }
+
+  loadAssociatedAssets(): void {
+    this.assetService
+      .getAssetsByEmployee(this.employeeId)
+      .pipe(
+        catchError(() => {
+          this.notificationService.showError('Erro ao recarregar ativos.');
+          return of([]);
+        })
+      )
+      .subscribe((assets) => {
+        this.associatedAssets = assets;
+      });
+  }
+
+  openAssociateAssetDialog(): void {
+    const dialogRef = this.dialog.open(AssociateAssetDialogComponent, {
+      width: '500px',
+      data: { employeeId: this.employeeId },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadAssociatedAssets();
+      }
     });
   }
 
-  checkIfHasNotebook(): void {
-    this.hasNotebook = this.associatedAssets.some(
-      (asset) => asset.type.toLowerCase() === 'notebook'
-    );
-  }
-
-  associateAsset(assetId: string): void {
-    this.assetService.associateAsset(assetId, this.employeeId).subscribe({
-      next: () => {
-        this.notificationService.showSuccess('Ativo associado com sucesso!');
-        this.loadData();
-      },
-      error: (err) =>
-        this.notificationService.showError(
-          err.error.message || 'Erro ao associar ativo.'
-        ),
-    });
-  }
-
-  disassociateAsset(assetId: string): void {
-    this.assetService.disassociateAsset(assetId).subscribe({
-      next: () => {
-        this.notificationService.showSuccess('Ativo desassociado com sucesso!');
-        this.loadData();
-      },
-      error: () =>
-        this.notificationService.showError('Erro ao desassociar ativo.'),
-    });
+  dissociateAsset(assetId: string): void {
+    if (confirm('Tem certeza que deseja desassociar este ativo?')) {
+      this.assetService.disassociateAsset(assetId).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            'Ativo desassociado com sucesso!'
+          );
+          this.loadAssociatedAssets();
+        },
+        error: (err) => {
+          this.notificationService.showError(
+            err.error.message || 'Erro ao desassociar o ativo.'
+          );
+        },
+      });
+    }
   }
 }
