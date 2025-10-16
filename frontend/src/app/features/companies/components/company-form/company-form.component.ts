@@ -35,6 +35,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 export class CompanyFormComponent implements OnInit {
   form: FormGroup;
   isEditMode: boolean;
+  displayId: string | undefined;
 
   constructor(
     private fb: FormBuilder,
@@ -45,12 +46,14 @@ export class CompanyFormComponent implements OnInit {
   ) {
     this.isEditMode = !!this.data?.company;
     this.form = this.fb.group({
+      id: [{ value: '', disabled: true }],
       name: ['', Validators.required],
       cnpj: ['', [Validators.required, Validators.pattern(/^\d{14}$/)]],
     });
 
-    if (this.isEditMode) {
+    if (this.isEditMode && this.data.company) {
       this.form.patchValue(this.data.company);
+      this.displayId = this.data.company.id.slice(0, 4);
     }
   }
 

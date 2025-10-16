@@ -1,8 +1,13 @@
-<h1 mat-dialog-title>{{ isEditMode ? 'Editar Empresa' : 'Nova Empresa' }}</h1>
-<div mat-dialog-content [formGroup]="form">
+<h2 mat-dialog-title>{{ isEditMode ? 'Editar Empresa' : 'Nova Empresa' }}</h2>
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="fill" *ngIf="isEditMode">
+    <mat-label>ID</mat-label>
+    <input matInput [value]="displayId" readonly />
+  </mat-form-field>
+
   <mat-form-field appearance="fill">
     <mat-label>Nome</mat-label>
-    <input matInput formControlName="name" required />
+    <input matInput formControlName="name" />
     <mat-error *ngIf="form.get('name')?.hasError('required')">
       Nome é obrigatório.
     </mat-error>
@@ -18,7 +23,7 @@
       CNPJ deve conter 14 dígitos numéricos.
     </mat-error>
   </mat-form-field>
-</div>
+</mat-dialog-content>
 <div mat-dialog-actions>
   <button mat-button (click)="onCancel()">Cancelar</button>
   <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid">
