@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Company } from '../models/company.model';
 import { environment } from '../../../environments/environment';
+import { Employee } from '../models/employee.model';
 
 @Injectable({
   providedIn: 'root',

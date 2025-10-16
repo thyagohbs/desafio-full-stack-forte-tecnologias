@@ -3,14 +3,14 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Employee } from '../../../../core/models/employee.model';
 import { CompanyService } from '../../../../core/services/company.service';
-import { EmployeeFormComponent } from '../../components/employee-form/employee-form.component';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { EmployeeFormComponent } from '../../../employees/components/employee-form/employee-form.component';
+//import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-employee-list',
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css'],
-  imports: [MatTooltipModule],
+  //imports: [MatTooltipModule],
 })
 export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];

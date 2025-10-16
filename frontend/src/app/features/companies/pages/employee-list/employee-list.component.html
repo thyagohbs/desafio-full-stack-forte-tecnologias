@@ -1,5 +1,5 @@
 <mat-toolbar color="primary">
-  <span>Funcionários da Empresa</span>
+  <span>Funcionários da Empresa {{ company?.name }}</span>
 </mat-toolbar>
 
 <mat-card>
@@ -15,13 +15,17 @@
   </mat-card-header>
   <mat-card-content>
     <table mat-table [dataSource]="employees" class="mat-elevation-z8">
-      <!-- ... existing code -->
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let employee">{{ employee.name }}</td>
+      </ng-container>
+
       <ng-container matColumnDef="email">
         <th mat-header-cell *matHeaderCellDef>Email</th>
         <td mat-cell *matCellDef="let employee">{{ employee.email }}</td>
       </ng-container>
 
-      <!-- Actions Column -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Ações</th>
         <td mat-cell *matCellDef="let employee">

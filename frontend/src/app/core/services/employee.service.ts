@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { Employee } from '../models/employee.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {
+  CreateEmployeeDto,
+  Employee,
+  UpdateEmployeeDto,
+} from '../models/employee.model';
 import { environment } from '../../../environments/environment';
+import { Asset } from '../models/asset.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,52 +15,45 @@ import { environment } from '../../../environments/environment';
 export class EmployeeService {
   private apiUrl = `${environment.apiUrl}/employees`;
 
-  private employeesSubject = new BehaviorSubject<Employee[]>([]);
-  public employees$: Observable<Employee[]> =
-    this.employeesSubject.asObservable();
-
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(this.apiUrl).pipe(
-      tap((employees) => {
-        this.employeesSubject.next(employees);
-      })
+  getEmployeesByCompany(companyId: string): Observable<Employee[]> {
+    return this.http.get<Employee[]>(
+      `${environment.apiUrl}/companies/${companyId}/employees`
     );
+  }
+
+  createEmployee(
+    employee: Omit<Employee, 'id' | 'company'>
+  ): Observable<Employee> {
+    return this.http.post<Employee>(this.apiUrl, employee);
+  }
+
+  getAssetsByEmployee(employeeId: string): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${this.apiUrl}/${employeeId}/assets`);
+  }
+
+  getAll(companyId?: string): Observable<Employee[]> {
+    let params = new HttpParams();
+    if (companyId) {
+      params = params.set('companyId', companyId);
+    }
+    return this.http.get<Employee[]>(this.apiUrl, { params });
   }
 
   getById(id: string): Observable<Employee> {
     return this.http.get<Employee>(`${this.apiUrl}/${id}`);
   }
 
-  create(employee: Omit<Employee, 'id'>): Observable<Employee> {
-    return this.http.post<Employee>(this.apiUrl, employee).pipe(
-      tap((newEmployee) => {
-        const currentEmployees = this.employeesSubject.getValue();
-        this.employeesSubject.next([...currentEmployees, newEmployee]);
-      })
-    );
+  create(employee: CreateEmployeeDto): Observable<Employee> {
+    return this.http.post<Employee>(this.apiUrl, employee);
   }
 
-  update(id: string, employee: Partial<Employee>): Observable<Employee> {
-    return this.http.patch<Employee>(`${this.apiUrl}/${id}`, employee).pipe(
-      tap((updatedEmployee) => {
-        const currentEmployees = this.employeesSubject.getValue();
-        const updatedEmployees = currentEmployees.map((e) =>
-          e.id === id ? updatedEmployee : e
-        );
-        this.employeesSubject.next(updatedEmployees);
-      })
-    );
+  update(id: string, employee: UpdateEmployeeDto): Observable<Employee> {
+    return this.http.patch<Employee>(`${this.apiUrl}/${id}`, employee);
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => {
-        const currentEmployees = this.employeesSubject.getValue();
-        const remainingEmployees = currentEmployees.filter((e) => e.id !== id);
-        this.employeesSubject.next(remainingEmployees);
-      })
-    );
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

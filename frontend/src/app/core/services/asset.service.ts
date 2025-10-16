@@ -27,7 +27,7 @@ export class AssetService {
     return this.http.post<Asset>(this.apiUrl, asset).pipe(
       tap((newAsset) => {
         const currentAssets = this.assetsSubject.getValue();
-        this.assetsSubject.next([...currentAssets, newAsset]); // Adiciona o novo ativo à lista
+        this.assetsSubject.next([...currentAssets, newAsset]);
       })
     );
   }
@@ -39,7 +39,7 @@ export class AssetService {
         const updatedAssets = currentAssets.map((a) =>
           a.id === id ? updatedAsset : a
         );
-        this.assetsSubject.next(updatedAssets); // Atualiza o ativo na lista
+        this.assetsSubject.next(updatedAssets);
       })
     );
   }
@@ -54,7 +54,6 @@ export class AssetService {
     );
   }
 
-  // Métodos que não alteram a lista principal não precisam modificar o Subject
   getById(id: string): Observable<Asset> {
     return this.http.get<Asset>(`${this.apiUrl}/${id}`);
   }
@@ -63,5 +62,22 @@ export class AssetService {
     return this.http.get<Asset[]>(`${this.apiUrl}`, {
       params: { status: 'Disponível' },
     });
+  }
+
+  getAssetsByEmployee(employeeId: string): Observable<Asset[]> {
+    return this.http.get<Asset[]>(
+      `${environment.apiUrl}/employees/${employeeId}/assets`
+    );
+  }
+
+  associateAsset(employeeId: string, assetId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/associate`, {
+      employeeId,
+      assetId,
+    });
+  }
+
+  disassociateAsset(assetId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/disassociate`, { assetId });
   }
 }
